@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, Button, Alert } from 'react-native';
 import { FIREBASE_AUTH } from '../FirebaseConfig';
 import { signOut } from 'firebase/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Settings() {  // removed navigation prop as we won't need it
   const handleLogout = async () => {
@@ -17,6 +18,7 @@ export default function Settings() {  // removed navigation prop as we won't nee
           text: "Logout", 
           onPress: async () => {
             try {
+              await AsyncStorage.setItem('isLoggedOut', 'true');
               await signOut(FIREBASE_AUTH);
               // The auth state change will automatically trigger navigation
             } catch (error) {

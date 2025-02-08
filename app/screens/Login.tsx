@@ -2,9 +2,9 @@ import { View, Text, StyleSheet, TextInput, ActivityIndicator, Button, KeyboardA
 import React, { useState } from 'react'
 import { FIREBASE_AUTH } from '../../FirebaseConfig'
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Login = () => {
-
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [loading, setLoading] = useState(false)
@@ -14,6 +14,9 @@ const Login = () => {
         setLoading(true)
         try {
             await signInWithEmailAndPassword(auth, email, password)
+            await AsyncStorage.setItem('email', email)
+            await AsyncStorage.setItem('password', password)
+            await AsyncStorage.setItem('isLoggedOut', 'false')
         } catch (error: any) {
             alert("Sign in failed: " + error.message)
             console.error(error)
@@ -21,6 +24,7 @@ const Login = () => {
             setLoading(false)
         }
     }
+
     const signUp = async () => {
         setLoading(true)
         try {
@@ -35,35 +39,66 @@ const Login = () => {
         }
     }
 
+    React.useEffect(() => {
+        const tryAutoLogin = async () => {
+            const isLoggedOut = await AsyncStorage.getItem('isLoggedOut')
+            if (isLoggedOut === 'true') {
+                // Just load the stored email but don't auto-login
+                const storedEmail = await AsyncStorage.getItem('email')
+                if (storedEmail) setEmail(storedEmail)
+                return
+            }
 
-  return (
-    <View style={styles.container}>
-        <KeyboardAvoidingView behavior='padding' style={styles.container}>
-        <TextInput 
-            style={styles.input}
-            placeholder="Email"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType='email-address'
-        />
-        <TextInput 
-            style={styles.input}
-            placeholder="Password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-        />
-        {loading ? <ActivityIndicator size="large" color="blue" />
-        : <>
-            <Button title="Sign In" onPress={signIn} />
-            <Button title="Sign Up" onPress={signUp} />
-        </>}
-        </KeyboardAvoidingView>
-    </View>
-  )
+            const storedEmail = await AsyncStorage.getItem('email')
+            const storedPassword = await AsyncStorage.getItem('password')
+            
+            if (storedEmail && storedPassword) {
+                setEmail(storedEmail)
+                setPassword(storedPassword)
+                // Attempt auto-login
+                setLoading(true)
+                try {
+                    await signInWithEmailAndPassword(auth, storedEmail, storedPassword)
+                } catch (error) {
+                    console.log("Auto-login failed, requiring manual login")
+                } finally {
+                    setLoading(false)
+                }
+            }
+        }
+        tryAutoLogin()
+    }, [])
+
+    return (
+        <View style={styles.container}>
+            <KeyboardAvoidingView behavior='padding' style={styles.container}>
+                <TextInput 
+                    style={styles.input}
+                    placeholder="Email"
+                    value={email}
+                    onChangeText={setEmail}
+                    keyboardType='email-address'
+                />
+                <TextInput 
+                    style={styles.input}
+                    placeholder="Password"
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry
+                />
+                {loading ? <ActivityIndicator size="large" color="blue" />
+                : <>
+                    <Button title="Sign In" onPress={signIn} />
+                    <Button title="Sign Up" onPress={signUp} />
+                </>}
+            </KeyboardAvoidingView>
+        </View>
+    )
 }
+
 const styles = StyleSheet.create({
     container: {
+        backgroundColor: 'white',
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center'
@@ -75,6 +110,5 @@ const styles = StyleSheet.create({
         borderWidth: 1
     }
 })
-
 
 export default Login
