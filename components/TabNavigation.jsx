@@ -1,29 +1,24 @@
-import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Platform } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
+import { useAppTheme } from '../hooks/colorScheme';
 
-import Home from '../screens/Home';
-import Track from '../screens/Track';
-import Metrics from '../screens/Metrics';
-import Settings from '../screens/Settings';
+import Home from '../app/(tabs)/Home';
+import Track from '../app/(tabs)/Track';
+import Metrics from '../app/(tabs)/Metrics';
+import Settings from '../app/(tabs)/Settings';
 
 const Tab = createBottomTabNavigator();
 
 export function TabNavigation() {
+  const colors = useAppTheme();
+
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarStyle: Platform.select({
-          ios: {
-            position: 'absolute',
-            backgroundColor: '#ffffff',
-          },
-          default: {
-            backgroundColor: '#ffffff',
-          },
-        }),
+        tabBarActiveTintColor: colors.accent,
+        tabBarInactiveTintColor: colors.text,
+        tabBarStyle: { backgroundColor: colors.background }
       }}>
       <Tab.Screen
         name="Home"

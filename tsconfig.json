@@ -1,9 +1,14 @@
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "strict": true
+    "strict": true,
+    "paths": {
+      "@/*": [
+        "./*"
+      ]
+    }
   },
   "include": [
     "app/**/*"
-  ]
+, "app/Login.tsx", "app/Home.jsx", "app/Metrics.jsx", "app/Settings.jsx", "app/Track.jsx"  ]
 }
