@@ -1,4 +1,4 @@
-import getCustomFoodData from '../utils/databaseUtils';
+import getCustomFoodData from './getCustomFood';
 
 const API_URL = 'https://ralport.pythonanywhere.com';
 

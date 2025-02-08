@@ -1,4 +1,5 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AntDesign } from '@expo/vector-icons';
 import { useAppTheme } from '../../hooks/colorScheme';
 
@@ -6,10 +7,12 @@ import Home from './Home';
 import Track from './Track';
 import Metrics from './Metrics';
 import Settings from './Settings';
+import FoodPage from '../FoodPage';
 
 const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
 
-export function TabNavigation() {
+function TabScreens() {
   const colors = useAppTheme();
 
   return (
@@ -57,5 +60,22 @@ export function TabNavigation() {
         }}
       />
     </Tab.Navigator>
+  );
+}
+
+export function TabNavigation() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen 
+        name="TabScreens" 
+        component={TabScreens} 
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="FoodPage" 
+        component={FoodPage}
+        options={{ headerShown: true }}
+      />
+    </Stack.Navigator>
   );
 }
