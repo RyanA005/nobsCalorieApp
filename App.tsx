@@ -4,7 +4,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { onAuthStateChanged, User } from "firebase/auth";
 
 import Login from './app/Login';
-import { TabNavigation } from './components/TabNavigation';
+import { TabNavigation } from './app/(tabs)/TabNavigation';
 import { FIREBASE_AUTH } from './FirebaseConfig';
 
 const Tab = createBottomTabNavigator();
@@ -21,7 +21,7 @@ export default function App() {
   if (!user) {
     return (
       <NavigationContainer>
-        <Tab.Navigator screenOptions={{ headerShown: false }}>
+        <Tab.Navigator screenOptions={{ headerShown: false, tabBarStyle: {display: 'none'} }}>
           <Tab.Screen name="Login" component={Login} />
         </Tab.Navigator>
       </NavigationContainer>

@@ -1,11 +1,11 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { AntDesign } from '@expo/vector-icons';
-import { useAppTheme } from '../hooks/colorScheme';
+import { useAppTheme } from '../../hooks/colorScheme';
 
-import Home from '../app/(tabs)/Home';
-import Track from '../app/(tabs)/Track';
-import Metrics from '../app/(tabs)/Metrics';
-import Settings from '../app/(tabs)/Settings';
+import Home from './Home';
+import Track from './Track';
+import Metrics from './Metrics';
+import Settings from './Settings';
 
 const Tab = createBottomTabNavigator();
 

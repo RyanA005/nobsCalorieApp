@@ -4,7 +4,12 @@ import { FIREBASE_AUTH } from '../FirebaseConfig'
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import { useAppTheme } from '../hooks/colorScheme';
+
 const Login = () => {
+
+    const colors = useAppTheme();
+    
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [loading, setLoading] = useState(false)
@@ -70,23 +75,23 @@ const Login = () => {
     }, [])
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, {backgroundColor: colors.background}]}>
             <KeyboardAvoidingView behavior='padding' style={styles.container}>
                 <TextInput 
-                    style={styles.input}
+                    style={[styles.input, {color: colors.text, borderColor: colors.text}]}
                     placeholder="Email"
                     value={email}
                     onChangeText={setEmail}
                     keyboardType='email-address'
                 />
                 <TextInput 
-                    style={styles.input}
+                    style={[styles.input, {color: colors.text, borderColor: colors.text}]}
                     placeholder="Password"
                     value={password}
                     onChangeText={setPassword}
                     secureTextEntry
                 />
-                {loading ? <ActivityIndicator size="large" color="blue" />
+                {loading ? <ActivityIndicator size="large" color={colors.text} />
                 : <>
                     <Button title="Sign In" onPress={signIn} />
                     <Button title="Sign Up" onPress={signUp} />
@@ -98,7 +103,6 @@ const Login = () => {
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: 'white',
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center'
@@ -107,6 +111,7 @@ const styles = StyleSheet.create({
         width: 300,
         padding: 10,
         margin: 10,
+        borderRadius: 10,
         borderWidth: 1
     }
 })
