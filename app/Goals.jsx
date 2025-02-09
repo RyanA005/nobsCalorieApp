@@ -5,7 +5,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AntDesign } from '@expo/vector-icons';
 
 import { useAppTheme } from '../hooks/colorScheme';
-
 import MacroSplitGraph from '../components/MacroSplitGraph';
 
 const DEFAULT_VALUES = {
@@ -51,24 +50,13 @@ const DEFAULT_VALUES = {
   folate: '400',
 };
 
-export default function Goals() {
+export default function Goals({ navigation }) {
   const [goals, setGoals] = useState(DEFAULT_VALUES);
 
-  const navigation = useNavigation();
   const colors = useAppTheme();
-
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      titleStyle: { fontSize: 20 },
-      headerBackTitle: 'Home',
-      headerTintColor: colors.accent,
-    });
-  }, [navigation]);
-
   useEffect(() => {
     loadGoals();
   }, []);
-
   useEffect(() => {
     const proteinCals = parseFloat(goals.protein || '0') * 4;
     const carbsCals = parseFloat(goals.carbs || '0') * 4;
@@ -102,7 +90,7 @@ export default function Goals() {
     try {
       await AsyncStorage.setItem('userGoals', JSON.stringify(goals));
       alert('Goals saved successfully!');
-      router.back();
+      navigation.goBack();
     } catch (error) {
       console.error('Error saving goals:', error);
     }
@@ -336,7 +324,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 5,
-    marginBottom: 8, // Reduced from 16 to 8
+    marginBottom: 8,
   },
   topGraphic: {
     gap: 16,

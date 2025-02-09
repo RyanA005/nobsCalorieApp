@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { View, Text, Modal, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Link, useFocusEffect } from 'expo-router';
+import { useNavigation } from '@react-navigation/native';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useState } from 'react';
 
@@ -14,7 +14,7 @@ import LoggedFoodItem from '@/components/LoggedFoodItem';
 
 import { useAppTheme } from '../../hooks/colorScheme';
 
-export default function Home () {
+export default function Home({ navigation }) {  // Add navigation prop
 
   const colors = useAppTheme();
   
@@ -45,28 +45,41 @@ export default function Home () {
   const [day, setDay] = useState(today);
 
   useEffect(() => {
-      //checkDay();
-
-      const loadAllData = async () => {
-        try {
-          const results = await database.getAllAsync(
-            "SELECT id, name, qty, baseQty, cal, protein, carb, fat, iscustom, day FROM foodhistory"
-          );
-          //console.log("Loaded food data:", results);
-          setFoodData(results || []);
-
-          // Load goals
-          const savedGoals = await AsyncStorage.getItem('userGoals');
-          if (savedGoals) {
-            setGoals(JSON.parse(savedGoals));
-          }
-        } catch (error) {
-          console.error("Error loading data:", error);
+    const loadGoals = async () => {
+      try {
+        const savedGoals = await AsyncStorage.getItem('userGoals');
+        if (savedGoals) {
+          setGoals(JSON.parse(savedGoals));
         }
-      };
+      } catch (error) {
+        console.error('Error loading goals:', error);
+      }
+    };
 
-      loadAllData();
-    }, [database]);
+    // Load goals initially
+    loadGoals();
+
+    // Add listener for when screen comes into focus
+    const unsubscribe = navigation.addListener('focus', () => {
+      loadGoals();
+    });
+
+    // Cleanup listener on component unmount
+    return unsubscribe;
+  }, [navigation]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const results = await database.getAllAsync(
+          "SELECT id, name, qty, baseQty, cal, protein, carb, fat, iscustom, day FROM foodhistory"
+        );
+        setFoodData(results || []);
+      } catch (error) {
+        console.error('Error loading food data:', error);
+      }
+    })();
+  }, [database]);
 
 
   // Update totals whenever foodData or day changes
@@ -151,10 +164,10 @@ export default function Home () {
         <View style={[styles.graphics, {}]}>
           <View style={{ flex: 1, flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}> 
             <PercentCompletionGraph values={values.calories} />
-            <Link href="/Goals">
-              <AntDesign name="setting" size={16} color={colors.accent} />
+            <TouchableOpacity onPress={() => navigation.navigate('Goals')} style={{width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
+              <AntDesign name="setting" size={14} color={colors.accent} />
               <Text style={{color: colors.accent}}> Goals</Text>
-            </Link>
+            </TouchableOpacity>
           </View>
           <View style={{gap: 10, justifyContent: 'center', alignItems: 'center'}}>
             <HorizontalBarChart values={values.protein} />

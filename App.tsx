@@ -3,10 +3,12 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { onAuthStateChanged, User } from "firebase/auth";
 import { SQLiteProvider, SQLiteDatabase } from 'expo-sqlite';
+import { useAppTheme } from './hooks/colorScheme';
 
 import Login from './app/Login';
 import { TabNavigation } from './app/(tabs)/TabNavigation';
 import { FIREBASE_AUTH } from './FirebaseConfig';
+import Goals from './app/Goals';
 
 const Stack = createNativeStackNavigator();
 
@@ -57,6 +59,7 @@ export default function App() {
       }
   }
   const [user, setUser] = useState<User | null>(null);
+  const colors = useAppTheme();
 
   useEffect(() => {
     onAuthStateChanged(FIREBASE_AUTH, (user) => {
@@ -67,7 +70,11 @@ export default function App() {
   if (!user) {
     return (
       <NavigationContainer>
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Navigator screenOptions={{ 
+          headerShown: false,
+          headerTintColor: colors.accent,
+          headerTitleStyle: { color: colors.accent }
+        }}>
           <Stack.Screen name="Login" component={Login} />
         </Stack.Navigator>
       </NavigationContainer>
@@ -76,9 +83,23 @@ export default function App() {
 
   return (
     <SQLiteProvider databaseName="foodhistory.db" onInit={createDB}>
-    <NavigationContainer>
-      <TabNavigation />
-    </NavigationContainer>
+      <NavigationContainer>
+        <Stack.Navigator screenOptions={{ 
+          headerTintColor: colors.accent,
+          headerTitleStyle: { color: colors.accent }
+        }}>
+          <Stack.Screen 
+            name="Main" 
+            component={TabNavigation}
+            options={{ headerShown: false }} 
+          />
+          <Stack.Screen 
+            name="Goals" 
+            component={Goals}
+            options={{ headerShown: true }} 
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
     </SQLiteProvider>
   );
 }

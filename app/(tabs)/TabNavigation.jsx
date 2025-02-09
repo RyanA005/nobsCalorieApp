@@ -13,6 +13,9 @@ import FoodPage from '../FoodPage';
 import QuickAdd from '../QuickAdd';
 import Scan from '../Scan';
 
+import Goals from '../Goals';
+import DetailsModal from '../DetailsModal';
+
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
@@ -69,8 +72,13 @@ function TabScreens({ navigation }) {
 }
 
 export function TabNavigation() {
+  const colors = useAppTheme();
+  
   return (
-    <Stack.Navigator>
+    <Stack.Navigator screenOptions={{ 
+      headerTintColor: colors.accent,
+      headerTitleStyle: { color: colors.accent }
+    }}>
       <Stack.Screen 
         name="TabScreens" 
         component={TabScreens} 
@@ -90,6 +98,11 @@ export function TabNavigation() {
         name="Scan" 
         component={Scan}
         options={{ headerShown: true }}
+      />
+      <Stack.Screen 
+        name="Goals" 
+        component={Goals}
+        options={{ headerShown: true, title: 'Goals' , headerBackTitle: 'Home' }}
       />
     </Stack.Navigator>
   );
