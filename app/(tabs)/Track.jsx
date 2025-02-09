@@ -89,7 +89,7 @@ return (
       <AntDesign.Button 
         style={styles.button}
         name="scan1" 
-        onPress={() => navigation.navigate('scan')}
+        onPress={() => navigation.navigate('Scan')}
         backgroundColor={colors.boxes}
         color={colors.accent}>
         Scan
@@ -98,7 +98,7 @@ return (
       <AntDesign.Button 
         style={styles.button}
         name="addfile" 
-        onPress={() => navigation.navigate('quickAdd')}
+        onPress={() => navigation.navigate('QuickAdd')}
         backgroundColor={colors.boxes}
         color={colors.accent}>
         Quick Add

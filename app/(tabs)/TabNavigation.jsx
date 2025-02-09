@@ -7,7 +7,10 @@ import Home from './Home';
 import Track from './Track';
 import Metrics from './Metrics';
 import Settings from './Settings';
+
 import FoodPage from '../FoodPage';
+import QuickAdd from '../QuickAdd';
+import Scan from '../Scan';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -74,6 +77,16 @@ export function TabNavigation() {
       <Stack.Screen 
         name="FoodPage" 
         component={FoodPage}
+        options={{ headerShown: true }}
+      />
+      <Stack.Screen 
+        name="QuickAdd" 
+        component={QuickAdd}
+        options={{ headerShown: true }}
+      />
+      <Stack.Screen 
+        name="Scan" 
+        component={Scan}
         options={{ headerShown: true }}
       />
     </Stack.Navigator>
