@@ -128,7 +128,7 @@ const QuickAdd = ({ navigation }) => {
               placeholder="Food Name"
               value={foodName}
               onChangeText={setFoodName}
-              placeholdercolor={colors.text+222222}
+              placeholderTextColor={colors.text + '80'}
               returnKeyType='done'
             />
           </View>
@@ -138,7 +138,7 @@ const QuickAdd = ({ navigation }) => {
               placeholder="100g"
               value={qty}
               onChangeText={setQty}
-              placeholdercolor={colors.text+222222}
+              placeholderTextColor={colors.text + '80'}
               keyboardType="numeric"
               returnKeyType='done'
             />
@@ -158,7 +158,7 @@ const QuickAdd = ({ navigation }) => {
                   placeholder="0g"
                   value={protein}
                   onChangeText={setProtein}
-                  placeholdercolor={colors.text+222222}
+                  placeholderTextColor={colors.text + '80'}
                   keyboardType="numeric"
                   returnKeyType='done'
                 />
@@ -172,7 +172,7 @@ const QuickAdd = ({ navigation }) => {
                   placeholder="0g"
                   value={carbs}
                   onChangeText={setCarbs}
-                  placeholdercolor={colors.text+222222}
+                  placeholderTextColor={colors.text + '80'}
                   keyboardType="numeric"
                   returnKeyType='done'
                 />
@@ -186,7 +186,7 @@ const QuickAdd = ({ navigation }) => {
                   placeholder="0g"
                   value={fats}
                   onChangeText={setFats}
-                  placeholdercolor={colors.text+222222}
+                  placeholderTextColor={colors.text + '80'}
                   keyboardType="numeric"
                   returnKeyType='done'
                 />

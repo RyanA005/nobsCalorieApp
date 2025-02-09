@@ -80,6 +80,7 @@ const Login = () => {
                 <TextInput 
                     style={[styles.input, {color: colors.text, borderColor: colors.text}]}
                     placeholder="Email"
+                    placeholderTextColor={colors.text + '80'}
                     value={email}
                     onChangeText={setEmail}
                     keyboardType='email-address'
@@ -87,6 +88,7 @@ const Login = () => {
                 <TextInput 
                     style={[styles.input, {color: colors.text, borderColor: colors.text}]}
                     placeholder="Password"
+                    placeholderTextColor={colors.text + '80'}
                     value={password}
                     onChangeText={setPassword}
                     secureTextEntry

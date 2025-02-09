@@ -4,10 +4,10 @@ import { FIREBASE_AUTH } from '../../FirebaseConfig';
 import { signOut } from 'firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { Colors } from '../../constants/Colors';
+import { useAppTheme } from '../../hooks/colorScheme';
 
 export default function Settings() {
-  const colors = null;
+  const colors = useAppTheme();
   const [userEmail, setUserEmail] = useState('');
 
   useEffect(() => {
@@ -43,9 +43,9 @@ export default function Settings() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text>Settings Screen</Text>
-      <Text>Email: {userEmail}</Text>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <Text style={[styles.text, {color: colors.text}]}>Settings Screen</Text>
+      <Text style={[styles.text, {color: colors.text}]}>Email: {userEmail}</Text>
       <Button
         style={styles.button}
         title="Logout"
@@ -64,5 +64,9 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: 'lightblue',
     padding: 20,
+  },
+  text: {
+    fontSize: 20,
+    margin: 10,
   },
 });

@@ -29,7 +29,7 @@ function TabScreens({ navigation }) {
         headerShown: false,
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.text,
-        tabBarStyle: { backgroundColor: colors.boxes }
+        tabBarStyle: { backgroundColor: colors.boxes, borderTopWidth: 0 },
       }}>
       <Tab.Screen
         name="Home"
@@ -77,7 +77,8 @@ export function TabNavigation() {
   return (
     <Stack.Navigator screenOptions={{ 
       headerTintColor: colors.accent,
-      headerTitleStyle: { color: colors.accent }
+      headerTitleStyle: { color: colors.accent },
+      headerStyle: { backgroundColor: colors.boxes }
     }}>
       <Stack.Screen 
         name="TabScreens" 

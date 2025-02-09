@@ -220,7 +220,7 @@ export default function Goals({ navigation }) {
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.listContainer}>
       <View style={[styles.card, { backgroundColor: colors.boxes }]}>
         <View style={styles.topGraphic}>

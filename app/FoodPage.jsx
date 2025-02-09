@@ -412,7 +412,7 @@ export default function FoodPage() {
 
 
   return (
-    <Animated.View style={[styles.container, { opacity: fadeAnim, backgroundColor: colors.background }]}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {!fromQuickAdd && (
         <View style={[styles.card, styles.topGraphic, { backgroundColor: colors.boxes }]}>
           <View style={styles.graphContainer}>
@@ -432,6 +432,7 @@ export default function FoodPage() {
                 clearTextOnFocus={true}
                 keyboardType="numeric"
                 returnKeyType="done"
+                placeholderTextColor={colors.text + '80'}
                 style={[styles.qtyInput, {color: colors.text}]}
               />
               <Text style={[styles.unitText, { color: colors.text }]}>g</Text>
@@ -454,6 +455,7 @@ export default function FoodPage() {
               onEndEditing={changeProteinQty}
               placeholder={''}
               defaultValue={foodData.protein?.toString() || ''}
+              placeholderTextColor={colors.text + '80'}
               clearTextOnFocus={true}
               keyboardType="numeric"
               returnKeyType="done"
@@ -470,6 +472,7 @@ export default function FoodPage() {
               onEndEditing={changeCarbQty}
               placeholder={''}
               defaultValue={foodData.carbs?.toString() || ''}
+              placeholderTextColor={colors.text + '80'}
               clearTextOnFocus={true}
               keyboardType="numeric"
               returnKeyType="done"
@@ -486,6 +489,7 @@ export default function FoodPage() {
               onEndEditing={changeFatQty}
               placeholder={''}
               defaultValue={foodData.fats?.toString() || ''}
+              placeholderTextColor={colors.text + '80'}
               clearTextOnFocus={true}
               keyboardType="numeric"
               returnKeyType="done"
@@ -575,7 +579,7 @@ export default function FoodPage() {
         </View>
       </View>
 
-  </Animated.View>);
+  </View>);
   }
 
 const MacroRow = ({ label, value, color }) => (
@@ -591,7 +595,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#f5f5f5',
   },
   card: {
     borderRadius: 20,
@@ -745,7 +748,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     padding: 12,
     borderRadius: 12,
-    backgroundColor: '#f8f8f8',
     minWidth: 75,
     textAlign: 'center',
   },

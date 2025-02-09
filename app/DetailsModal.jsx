@@ -186,7 +186,7 @@ export default function DetailsModal({ isVisible, onClose, day }) {  // Add day 
                 </View>
 
                 <FlatList
-                    data={createNutrientData()}
+                    data={createNutrientData()} 
                     renderItem={({ item }) => (
                         <View style={[styles.nutrientSection, { backgroundColor: colors.boxes }]}>
                             <Text style={[styles.sectionTitle, { color: colors.accent }]} numberOfLines={1}>{item.title}</Text>

@@ -65,43 +65,52 @@ export default function Track({ navigation }) {
   const database = useSQLiteContext();
 
 return (
-  <View style={[styles.container, {marginTop: 50}]}>
-    <TextInput 
-      value={search} 
-      onChangeText={setSearch}
-      onSubmitEditing={() => performSearch(search)}
-      returnKeyType="search"
-      placeholder="Search for Foods" 
-      style={[styles.input, {backgroundColor: colors.boxes, color: colors.text}]} 
-    />
+  <View style={[styles.container, {backgroundColor: colors.background}]}>
+    <View style={[styles.card, {backgroundColor: colors.boxes}]}>
+      <TextInput 
+        value={search} 
+        onChangeText={setSearch}
+        onSubmitEditing={() => performSearch(search)}
+        returnKeyType="search"
+        placeholder="Search for Foods..." 
+        placeholderTextColor={colors.text + '80'}
+        style={[styles.input, {color: colors.text}]} 
+      />
+    </View>
 
-    <View style={styles.buttonContainer}> 
-      <AntDesign.Button 
-        style={styles.button}
-        name="search1" 
-        onPress={() => performSearch(search)}
-        backgroundColor={colors.boxes}
-        color={colors.accent}>
-        Search
-      </AntDesign.Button>
+    <View style={[styles.buttonContainer, {backgroundColor: colors.background}]}> 
+      <View style={[styles.buttonCard, {backgroundColor: colors.boxes}]}>
+        <AntDesign.Button 
+          style={styles.button}
+          name="search1" 
+          onPress={() => performSearch(search)}
+          backgroundColor="transparent"
+          color={colors.accent}>
+          Search
+        </AntDesign.Button>
+      </View>
 
-      <AntDesign.Button 
-        style={styles.button}
-        name="scan1" 
-        onPress={() => navigation.navigate('Scan')}
-        backgroundColor={colors.boxes}
-        color={colors.accent}>
-        Scan
-      </AntDesign.Button>
+      <View style={[styles.buttonCard, {backgroundColor: colors.boxes}]}>
+        <AntDesign.Button 
+          style={styles.button}
+          name="scan1" 
+          onPress={() => navigation.navigate('Scan')}
+          backgroundColor="transparent"
+          color={colors.accent}>
+          Scan
+        </AntDesign.Button>
+      </View>
       
-      <AntDesign.Button 
-        style={styles.button}
-        name="addfile" 
-        onPress={() => navigation.navigate('QuickAdd')}
-        backgroundColor={colors.boxes}
-        color={colors.accent}>
-        Quick Add
-      </AntDesign.Button>
+      <View style={[styles.buttonCard, {backgroundColor: colors.boxes}]}>
+        <AntDesign.Button 
+          style={styles.button}
+          name="addfile" 
+          onPress={() => navigation.navigate('QuickAdd')}
+          backgroundColor="transparent"
+          color={colors.accent}>
+          Quick Add
+        </AntDesign.Button>
+      </View>
     </View>
 
     {noResults && (
@@ -127,23 +136,48 @@ return (
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10,
-    gap: 10,
+    padding: 8,
+    gap: 16,
+  },
+  card: {
+    borderRadius: 20,
+    padding: 5,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+    marginTop: 65,
   },
   input: {
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderRadius: 20,
     padding: 10,
-    flexDirection: 'row',},
+    fontSize: 16,
+    fontWeight: '500',
+  },
   button: {
     justifyContent: 'center',
-    minWidth: '100',
+    minWidth: 100,
     height: 50,
+    paddingHorizontal: 15,
   },
   buttonContainer: {
     flexDirection: 'row', 
-    justifyContent: 'space-evenly'
+    justifyContent: 'space-between',
+    paddingHorizontal: 5,
+  },
+  buttonCard: {
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
   },
   noResults: {
     fontSize: 16,

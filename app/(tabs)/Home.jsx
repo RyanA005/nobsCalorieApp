@@ -135,7 +135,7 @@ export default function Home({ navigation }) {  // Add navigation prop
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, {backgroundColor: colors.background}]}>
       <View style={[styles.banner, {backgroundColor: colors.boxes}]}>
         <TouchableOpacity 
           activeOpacity={day === yesterday.toDateString() ? 1 : 0.2}
@@ -182,20 +182,20 @@ export default function Home({ navigation }) {  // Add navigation prop
       </View>
       
       <View style={[styles.card, {backgroundColor: colors.boxes}]}>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity 
+      <TouchableOpacity 
             activeOpacity={0.7}
             onPress={() => setIsDetailsModalVisible(true)}
-            style={styles.detailsButton}
           >
+        <View style={styles.buttonContainer}>
+          
             <AntDesign 
               name="infocirlceo" 
               size={24}
               color={colors.accent}
             />
-            <Text style={{color: colors.accent, fontSize: 16, marginLeft: 8}}>See Details</Text>
-          </TouchableOpacity>
+            <Text style={{color: colors.accent, fontSize: 16}}>See Details</Text>
         </View>
+        </TouchableOpacity>
       </View>
 
       <DetailsModal 
@@ -303,16 +303,11 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 5,
   },
-  detailsButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 5,
-    borderRadius: 5,
-  },
   buttonContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'center',
+    alignItems: 'center',
     width: '100%',
+    gap: 10,
   },
 });

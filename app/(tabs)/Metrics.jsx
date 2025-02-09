@@ -146,14 +146,6 @@ export default function Metrics() {
   ), [displayConfig, colors.green]);
 
   useEffect(() => {
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 500,
-      useNativeDriver: true,
-    }).start();
-  }, []);
-
-  useEffect(() => {
     getData();
   }, [getData]);
 
@@ -163,10 +155,7 @@ export default function Metrics() {
   }, [metrics]);
 
   return (
-    <Animated.View style={[styles.container, { 
-      opacity: fadeAnim, 
-      backgroundColor: colors.background 
-    }]}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.contentWrapper}>
         <View style={[styles.card, styles.graphCard, { backgroundColor: colors.boxes }]}>
           <View style={styles.graphTitleContainer}>
@@ -237,7 +226,7 @@ export default function Metrics() {
                 contentContainerStyle={styles.scrollContent}
               >
                 {getDisplayData.map((item) => (
-                  <MetricsGraphElement
+                  <MetricsGraphElement 
                     key={item.date}
                     values={[
                       displayConfig.tracking === "protein" ? item.protein : item.calories,
@@ -300,7 +289,7 @@ export default function Metrics() {
           </View> 
         </View>
       </View>
-    </Animated.View>
+    </View>
   )
 }
 
