@@ -4,7 +4,6 @@ import { useRoute, useNavigation } from '@react-navigation/native'
 import { AntDesign } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TouchableOpacity } from 'react-native';
-import { router } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 
 import { getFoodData } from '../functions/getFoodData';
@@ -154,7 +153,7 @@ export default function FoodPage() {
             targetDate.toDateString()
           ]
         );
-        router.back();
+        navigation.goBack();
       }
       catch (error) {
         console.log(error);
@@ -176,7 +175,7 @@ export default function FoodPage() {
           ]
         );
         console.log("successfully EDITED", name, "with qty", workingQty);
-        router.back();
+        navigation.goBack();
       }
       catch (error) {
         console.log(error);
@@ -188,7 +187,7 @@ export default function FoodPage() {
     try {
       await database.runAsync("DELETE FROM foodhistory WHERE id = ?;", [id]);
       console.log("Deleted item", id);
-      router.back();
+      navigation.goBack();
     } catch (error) {console.log(error)}
   }
   const handleCustomDelete = async (name) => {
@@ -235,7 +234,7 @@ export default function FoodPage() {
                 Alert.alert(
                   "Success",
                   "Custom food deleted successfully",
-                  [{ text: "OK", onPress: () => router.back() }]
+                  [{ text: "OK", onPress: () => navigation.goBack() }]
                 );
               } else {
                 throw new Error("Deletion verification failed");
@@ -293,7 +292,7 @@ export default function FoodPage() {
         name
       ]);
       alert("Changes saved");
-      router.back();
+      navigation.goBack();
     }
     catch (error) {
       console.log(error);

@@ -44,6 +44,17 @@ export default function Home({ navigation }) {  // Add navigation prop
 
   const [day, setDay] = useState(today);
 
+  const loadFoodData = async () => {
+    try {
+      const results = await database.getAllAsync(
+        "SELECT id, name, qty, baseQty, cal, protein, carb, fat, iscustom, day FROM foodhistory"
+      );
+      setFoodData(results || []);
+    } catch (error) {
+      console.error('Error loading food data:', error);
+    }
+  };
+
   useEffect(() => {
     const loadGoals = async () => {
       try {
@@ -69,17 +80,10 @@ export default function Home({ navigation }) {  // Add navigation prop
   }, [navigation]);
 
   useEffect(() => {
-    (async () => {
-      try {
-        const results = await database.getAllAsync(
-          "SELECT id, name, qty, baseQty, cal, protein, carb, fat, iscustom, day FROM foodhistory"
-        );
-        setFoodData(results || []);
-      } catch (error) {
-        console.error('Error loading food data:', error);
-      }
-    })();
-  }, [database]);
+    loadFoodData(); // Initial load
+    const unsubscribe = navigation.addListener('focus', loadFoodData);
+    return unsubscribe;
+  }, [database, navigation]);
 
 
   // Update totals whenever foodData or day changes
