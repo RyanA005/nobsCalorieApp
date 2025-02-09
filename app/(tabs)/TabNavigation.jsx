@@ -2,6 +2,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AntDesign } from '@expo/vector-icons';
 import { useAppTheme } from '../../hooks/colorScheme';
+import { useRef } from 'react';
 
 import Home from './Home';
 import Track from './Track';
@@ -15,8 +16,9 @@ import Scan from '../Scan';
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
-function TabScreens() {
+function TabScreens({ navigation }) {
   const colors = useAppTheme();
+  const rootNavigation = useRef(navigation);
 
   return (
     <Tab.Navigator

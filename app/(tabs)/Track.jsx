@@ -1,12 +1,11 @@
 import { View, StyleSheet, FlatList, TextInput, Text } from 'react-native'
-import React, { useEffect, useCallback } from 'react'
+import React from 'react'
 import FoodItem from '@/components/FoodItem'
 
 import { useState } from 'react'
 import { AntDesign } from '@expo/vector-icons'
 
 import { useSQLiteContext } from 'expo-sqlite';
-import { useFocusEffect } from 'expo-router';
 
 import { SearchFood } from '../../functions/SearchFood'
 import { useAppTheme } from '../../hooks/colorScheme';
