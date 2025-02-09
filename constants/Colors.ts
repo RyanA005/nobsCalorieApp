@@ -2,7 +2,7 @@ export const Colors = {
     light: {
       text: '#777',
       boxes: '#ffffff',
-      background: '#F5F7FA',
+      background: '#f5f5f5',
       accent: '#FF6B6B',
       innerBoxes: '#E9ECF2',
   
@@ -23,3 +23,5 @@ export const Colors = {
     },
   };
   
+
+  //'#000' : '#f5f5f5'

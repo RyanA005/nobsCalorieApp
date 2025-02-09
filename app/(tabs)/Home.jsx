@@ -195,19 +195,6 @@ export default function Home({ navigation }) {  // Add navigation prop
             />
             <Text style={{color: colors.accent, fontSize: 16, marginLeft: 8}}>See Details</Text>
           </TouchableOpacity>
-
-          <TouchableOpacity 
-            activeOpacity={0.7}
-            onPress={() => becomeNextDay(database)}
-            style={styles.detailsButton}
-          >
-            <AntDesign 
-              name="star" 
-              size={24}
-              color={colors.accent}
-            />
-            <Text style={{color: colors.accent, fontSize: 16, marginLeft: 8}}>Test Next Day</Text>
-          </TouchableOpacity>
         </View>
       </View>
 
@@ -222,6 +209,11 @@ export default function Home({ navigation }) {  // Add navigation prop
 
       <View style={[styles.todaysFood]}>
         <FlatList
+          ListEmptyComponent={() => (
+            day === today ? (
+              <Text style={{color: colors.text, textAlign: 'center'}}>Visit Track to add foods...</Text>
+            ) : null
+          )}
           data={foodData.filter(item => item.day === day)}
           renderItem={({ item }) => (
             <LoggedFoodItem 

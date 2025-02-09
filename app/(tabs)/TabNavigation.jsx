@@ -29,7 +29,7 @@ function TabScreens({ navigation }) {
         headerShown: false,
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.text,
-        tabBarStyle: { backgroundColor: colors.background }
+        tabBarStyle: { backgroundColor: colors.boxes }
       }}>
       <Tab.Screen
         name="Home"
@@ -92,12 +92,12 @@ export function TabNavigation() {
       <Stack.Screen 
         name="QuickAdd" 
         component={QuickAdd}
-        options={{ headerShown: true }}
+        options={{ headerShown: true, headerBackTitle: 'Back' }}
       />
       <Stack.Screen 
         name="Scan" 
         component={Scan}
-        options={{ headerShown: true }}
+        options={{ headerShown: true, headerBackTitle: 'Back' }}
       />
       <Stack.Screen 
         name="Goals" 

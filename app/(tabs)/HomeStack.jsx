@@ -4,11 +4,17 @@ import FoodPage from '../FoodPage';
 import QuickAdd from '../QuickAdd';
 import Scan from '../Scan';
 
+import { useAppTheme } from '../../hooks/colorScheme';
+
 const Stack = createNativeStackNavigator();
 
 export default function HomeStack() {
+
+  const colors = useAppTheme();
+
   return (
     <Stack.Navigator>
+
       <Stack.Screen 
         name="Home" 
         component={Home}
@@ -19,15 +25,16 @@ export default function HomeStack() {
         component={FoodPage}
         options={{ headerShown: true }}
       />
-      <Stack.Screen 
+      <Stack.Screen
         name="QuickAdd" 
         component={QuickAdd}
-        options={{ headerShown: true }}
+        options={{ headerShown: true, headerBackTitle: 'Back'}}
       />
       <Stack.Screen 
         name="Scan" 
         component={Scan}
-        options={{ headerShown: true }}
+        options={{ headerShown: true, headerBackTitle: 'Back'}}
+        
       />
     </Stack.Navigator>
   );
