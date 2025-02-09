@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import { FIREBASE_AUTH } from '../FirebaseConfig'
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { addDoc, collection } from 'firebase/firestore';
+import { addDoc, collection, doc, setDoc } from 'firebase/firestore';
 import { FIREBASE_DB } from '../FirebaseConfig';
 
 import { useAppTheme } from '../hooks/colorScheme';
@@ -35,15 +35,15 @@ const Login = () => {
     const signUp = async () => {
         setLoading(true)
         try {
-            await createUserWithEmailAndPassword(auth, email, password)
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password)
             alert("Sign up successful")
+            // Add user to collection after successful signup
+            await addUserToCollection(email, userCredential.user.uid)
         } catch (error: any) {
             alert("Sign up failed: " + error.message)
             console.error(error)
-        }
-        finally {
-        setLoading(false)
-        addUserToCollection(email)
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -77,10 +77,11 @@ const Login = () => {
         tryAutoLogin()
     }, [])
 
-    const addUserToCollection = async (email : String) => {
-        // Add a new document with a generated id.
-        await addDoc(collection(FIREBASE_DB, "users"), {
-          email: email,
+    const addUserToCollection = async (email: string, uid: string) => {
+        const userDocRef = doc(FIREBASE_DB, "users", uid);
+        await setDoc(userDocRef, {
+            email: email,
+            createdAt: new Date(),
         });
     }
 

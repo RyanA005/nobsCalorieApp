@@ -46,6 +46,7 @@ export default function Home({ navigation }) {  // Add navigation prop
       const results = await database.getAllAsync(
         "SELECT id, name, qty, baseQty, cal, protein, carb, fat, iscustom, day FROM foodhistory"
       );
+      //console.log('Loaded food data:', results);
       setFoodData(results || []);
     } catch (error) {
       console.error('Error loading food data:', error);
@@ -103,6 +104,7 @@ export default function Home({ navigation }) {  // Add navigation prop
           newTotals.totalCarb += Number(item.carb) * multiplier || 0;
           newTotals.totalFat += Number(item.fat) * multiplier || 0;
         });
+        //console.log('New totals:', newTotals);
     }
 
     setTotals(newTotals);

@@ -47,7 +47,7 @@ export default function Settings() {
   const db = useSQLiteContext();
   const date = new Date();
   const date2 = new Date();
-  date2.setDate(date2.getDate() - 1);
+  //console.log('date2:', date2);
   const sendTestData = async () => {
     try {
       await storeMetrics(FIREBASE_AUTH.currentUser, db, date2);
