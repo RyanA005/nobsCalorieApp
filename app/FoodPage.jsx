@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, TextInput, Alert, FlatList, Animated } from 'react-native'
+import { StyleSheet, Text, View, TextInput, Alert, FlatList, Animated, DeviceEventEmitter } from 'react-native'
 import React, { useLayoutEffect, useState, useEffect, useRef } from 'react'
 import { useRoute, useNavigation } from '@react-navigation/native'
 import { AntDesign } from '@expo/vector-icons';
@@ -153,6 +153,7 @@ export default function FoodPage() {
             targetDate.toDateString()
           ]
         );
+        DeviceEventEmitter.emit('foodHistoryChanged');
         navigation.goBack();
       }
       catch (error) {
@@ -174,7 +175,7 @@ export default function FoodPage() {
             id
           ]
         );
-        console.log("successfully EDITED", name, "with qty", workingQty);
+        DeviceEventEmitter.emit('foodHistoryChanged');
         navigation.goBack();
       }
       catch (error) {
@@ -186,7 +187,7 @@ export default function FoodPage() {
   const handleDelete = async (id) => {
     try {
       await database.runAsync("DELETE FROM foodhistory WHERE id = ?;", [id]);
-      console.log("Deleted item", id);
+      DeviceEventEmitter.emit('foodHistoryChanged');
       navigation.goBack();
     } catch (error) {console.log(error)}
   }

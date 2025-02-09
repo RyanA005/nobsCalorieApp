@@ -10,14 +10,15 @@ const MetricsGraphElement = memo(({ values }) => {
   const metrics = useMemo(() => {
     const maxHeight = 180;
     const barHeight = Math.min((goal / maxPossible) * maxHeight, maxHeight);
-    const fillHeight = Math.min((current / goal) * barHeight, barHeight * 1.5);
-
-    const overflow = fillHeight > barHeight;
-    const overflowHeight = overflow ? fillHeight - barHeight : 0;
+    const fillRatio = current / goal;
+    const rawFillHeight = fillRatio * barHeight;
+    const overflow = current > goal;
+    const fillHeight = overflow ? barHeight : rawFillHeight;
+    const overflowHeight = overflow ? Math.min((rawFillHeight - barHeight), maxHeight - barHeight) : 0;
 
     return {
       barHeight,
-      fillHeight: overflow ? barHeight : fillHeight,
+      fillHeight,
       overflowHeight,
       overflow,
     };

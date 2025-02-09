@@ -5,6 +5,8 @@ import { signOut } from 'firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { useAppTheme } from '../../hooks/colorScheme';
+import { storeMetrics } from '../../functions/firebaseDB';
+import { useSQLiteContext } from 'expo-sqlite';
 
 export default function Settings() {
   const colors = useAppTheme();
@@ -42,6 +44,19 @@ export default function Settings() {
     );
   };
 
+  const db = useSQLiteContext();
+  const date = new Date();
+  const date2 = new Date();
+  date2.setDate(date2.getDate() - 1);
+  const sendTestData = async () => {
+    try {
+      await storeMetrics(FIREBASE_AUTH.currentUser, db, date2);
+      Alert.alert('Success', 'Test data sent to Firebase.');
+    } catch (error) {
+      Alert.alert('Error', 'Failed to send test data.');
+  }
+};
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Text style={[styles.text, {color: colors.text}]}>Settings Screen</Text>
@@ -50,6 +65,11 @@ export default function Settings() {
         style={styles.button}
         title="Logout"
         onPress={handleLogout}
+      />
+      <Button
+        style={styles.button}
+        title="test"
+        onPress={sendTestData}
       />
     </View>
   );

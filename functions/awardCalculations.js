@@ -1,53 +1,76 @@
 export const calculateAwards = (metrics) => {
   if (!metrics.length) return { streak: 0, totalDays: 0, perfectDays: 0, averageAccuracy: 0 };
 
-  const sortedMetrics = [...metrics].sort((a, b) => new Date(b.date) - new Date(a.date));
+  // Filter out empty days before calculations
+  const daysWithData = metrics.filter(metric => 
+    metric.actual.calories > 0 || metric.actual.protein > 0
+  );
+
+  const sortedMetrics = [...daysWithData].sort((a, b) => new Date(b.date) - new Date(a.date));
   const today = new Date();
-  const twoDaysAgo = new Date(today.setDate(today.getDate() - 2));
-
+  today.setHours(0, 0, 0, 0);
+  
   let currentStreak = 0;
-  let expectedDate = new Date(twoDaysAgo);
-  let stats = {
-    perfectDays: 0,
-    accuracySum: 0
-  };
+  let previousDate = null;
 
-  // Calculate current streak
-  for (let i = 0; i < sortedMetrics.length; i++) {
-    const metric = sortedMetrics[i];
+  // Calculate current streak starting from most recent day
+  for (const metric of sortedMetrics) {
     const currentDate = new Date(metric.date);
-    
-    if (i === 0 && currentDate.toDateString() !== twoDaysAgo.toDateString()) {
-      break; // Break if first entry isn't from two days ago
+    currentDate.setHours(0, 0, 0, 0);
+
+    // Skip empty days
+    if (metric.actual.calories === 0 && metric.actual.protein === 0) {
+      break;
     }
 
-    if (currentDate.toDateString() === expectedDate.toDateString() &&
-        (metric.protein > 0 || metric.calories > 0)) {
-      currentStreak++;
-      expectedDate.setDate(expectedDate.getDate() - 1);
-    } else {
-      break; // Break the streak if there's a gap
+    // For first entry
+    if (!previousDate) {
+      // If first entry is not today or yesterday or two days ago, break
+      const daysDiff = Math.floor((today - currentDate) / (1000 * 60 * 60 * 24));
+      if (daysDiff > 2) break;
+      currentStreak = 1;
+      previousDate = currentDate;
+      continue;
     }
+
+    // Check if dates are consecutive
+    const daysDiff = Math.floor((previousDate - currentDate) / (1000 * 60 * 60 * 24));
+    if (daysDiff !== 1) break;
+
+    currentStreak++;
+    previousDate = currentDate;
   }
 
-  // Rest of the calculations
+  // Rest of award calculations
+  let stats = {
+    perfectDays: 0,
+    accuracySum: 0,
+    validDays: 0
+  };
+
+  // Calculate perfect days and accuracy
   sortedMetrics.forEach(metric => {
-    // Perfect days calculation
-    if (Math.abs(metric.calories - metric.caloriesgoal) <= 100 &&
-        Math.abs(metric.protein - metric.proteingoal) <= 25) {
+    stats.validDays++;
+
+    // Perfect days calculation (within 10% of goals)
+    const calorieAccuracy = metric.actual.calories / metric.goals.calories;
+    const proteinAccuracy = metric.actual.protein / metric.goals.protein;
+    
+    if (calorieAccuracy >= 0.9 && calorieAccuracy <= 1.1 &&
+        proteinAccuracy >= 0.9 && proteinAccuracy <= 1.1) {
       stats.perfectDays++;
     }
 
     // Accuracy calculation
-    const proteinAccuracy = Math.min(metric.protein / metric.proteingoal, 1) * 100;
-    const calorieAccuracy = Math.min(metric.calories / metric.caloriesgoal, 1) * 100;
-    stats.accuracySum += (proteinAccuracy + calorieAccuracy) / 2;
+    const dayProteinAccuracy = Math.min(metric.actual.protein / metric.goals.protein, 1) * 100;
+    const dayCalorieAccuracy = Math.min(metric.actual.calories / metric.goals.calories, 1) * 100;
+    stats.accuracySum += (dayProteinAccuracy + dayCalorieAccuracy) / 2;
   });
 
   return {
     streak: currentStreak,
-    totalDays: metrics.length,
+    totalDays: daysWithData.length, // Only count days with actual data
     perfectDays: stats.perfectDays,
-    averageAccuracy: Math.round(stats.accuracySum / metrics.length)
+    averageAccuracy: stats.validDays > 0 ? Math.round(stats.accuracySum / stats.validDays) : 0
   };
 };

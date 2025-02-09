@@ -10,6 +10,8 @@ import { TabNavigation } from './app/(tabs)/TabNavigation';
 import { FIREBASE_AUTH } from './FirebaseConfig';
 import Goals from './app/Goals';
 
+
+
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -18,7 +20,7 @@ export default function App() {
     // DROP TABLE IF EXISTS customfoods;
     // DROP TABLE IF EXISTS metrics;
       try {
-          await db.execAsync(`      
+          await db.execAsync(`
             CREATE TABLE IF NOT EXISTS 
               foodhistory(
                   id INTEGER PRIMARY KEY AUTOINCREMENT,

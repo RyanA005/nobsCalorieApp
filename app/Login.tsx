@@ -3,6 +3,8 @@ import React, { useState } from 'react'
 import { FIREBASE_AUTH } from '../FirebaseConfig'
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { addDoc, collection } from 'firebase/firestore';
+import { FIREBASE_DB } from '../FirebaseConfig';
 
 import { useAppTheme } from '../hooks/colorScheme';
 
@@ -18,7 +20,7 @@ const Login = () => {
     const signIn = async () => {
         setLoading(true)
         try {
-            await signInWithEmailAndPassword(auth, email, password)
+            const userCredential = await signInWithEmailAndPassword(auth, email, password)
             await AsyncStorage.setItem('email', email)
             await AsyncStorage.setItem('password', password)
             await AsyncStorage.setItem('isLoggedOut', 'false')
@@ -41,6 +43,7 @@ const Login = () => {
         }
         finally {
         setLoading(false)
+        addUserToCollection(email)
         }
     }
 
@@ -73,6 +76,13 @@ const Login = () => {
         }
         tryAutoLogin()
     }, [])
+
+    const addUserToCollection = async (email : String) => {
+        // Add a new document with a generated id.
+        await addDoc(collection(FIREBASE_DB, "users"), {
+          email: email,
+        });
+    }
 
     return (
         <View style={[styles.container, {backgroundColor: colors.background}]}>

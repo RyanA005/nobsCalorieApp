@@ -1,14 +1,17 @@
-import { View, Text, StyleSheet, ScrollView, Animated, Dimensions } from 'react-native'
+import { View, Text, StyleSheet, ScrollView, Animated, Dimensions, DeviceEventEmitter } from 'react-native'
 import React, { useEffect, useRef, useMemo, useCallback } from 'react'
 import { useSQLiteContext } from 'expo-sqlite';
 import { useState } from 'react';
 import { TouchableOpacity } from 'react-native';
 import { AntDesign, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { Dropdown } from 'react-native-element-dropdown';
+import { getAuth } from 'firebase/auth';
+import { FIREBASE_APP } from '../../FirebaseConfig';
 
 import MetricsGraphElement from '../../components/MetricsGraphElement';
 import { calculateAwards } from '../../functions/awardCalculations';
 import { useAppTheme } from '../../hooks/colorScheme';
+import { assembleMetricsHistory } from '../../functions/assembleMetricsHistory';
 
 export default function Metrics() {
   
@@ -35,6 +38,7 @@ export default function Metrics() {
 
   const db = useSQLiteContext();
   const fadeAnim = useRef(new Animated.Value(0)).current;
+  const auth = getAuth(FIREBASE_APP);
 
   // Memoize static data
   const statSelectorData = useMemo(() => ([
@@ -49,27 +53,47 @@ export default function Metrics() {
     ...(metrics.length >= 365 ? [{value: 4, label: 'All Time'}] : [])
   ], [metrics.length]);
 
-  const findMax = useCallback((array, key1, key2) => {
+  const findMax = useCallback((array) => {
     return Math.max(
-      ...array.map(element => Math.max(element[key1], element[key2]))
+      ...array.map(element => Math.max(
+        element.actual[displayConfig.tracking], 
+        element.goals[displayConfig.tracking]
+      ))
     );
-  }, []);
+  }, [displayConfig.tracking]);
 
   const getData = useCallback(async () => {
-    const metricsData = await db.getAllAsync("SELECT * FROM metrics;");
-    setMetrics(metricsData);
-    
-    const reversedData = [...metricsData].reverse();
-    const currentMaxItems = Math.min(displayConfig.maxItems, metricsData.length);
-    const relevantData = reversedData.slice(0, currentMaxItems);
-    
-    setDisplayConfig(prev => ({
-      ...prev,
-      maxProtein: findMax(relevantData, "protein", "proteingoal"),
-      maxCalories: findMax(relevantData, "calories", "caloriesgoal")
-    }));
-  }, [db, displayConfig.maxItems]);
+    try {
+      if (!auth.currentUser) {
+        console.warn('No user logged in');
+        return;
+      }
 
+      const metricsData = await assembleMetricsHistory(auth.currentUser.uid, db);
+      if (!Array.isArray(metricsData) || metricsData.length === 0) {
+        console.warn('No metrics data returned');
+        setMetrics([]);
+        return;
+      }
+
+      setMetrics(metricsData);
+      
+      const reversedData = [...metricsData].reverse();
+      const currentMaxItems = Math.min(displayConfig.maxItems, metricsData.length);
+      const relevantData = reversedData.slice(0, currentMaxItems);
+      
+      if (relevantData.length > 0) {
+        setDisplayConfig(prev => ({
+          ...prev,
+          maxProtein: findMax(relevantData),
+          maxCalories: findMax(relevantData)
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching metrics:", error);
+      setMetrics([]);
+    }
+  }, [db, displayConfig.maxItems, findMax, auth.currentUser]);
   const getDisplayData = useMemo(() => {
     const maxForDisplay = 120;
     if (!metrics.length) return [];
@@ -146,8 +170,47 @@ export default function Metrics() {
   ), [displayConfig, colors.green]);
 
   useEffect(() => {
-    getData();
-  }, [getData]);
+    let mounted = true;
+    
+    const loadData = async () => {
+      if (!mounted) return;
+      await getData();
+    };
+
+    // Subscribe to food history changes
+    const subscription = DeviceEventEmitter.addListener('foodHistoryChanged', loadData);
+
+    loadData();
+
+    return () => {
+      mounted = false;
+      subscription.remove();
+      setMetrics([]);
+      setAwards({
+        streak: 0,
+        totalDays: 0,
+        averageAccuracy: 0,
+        perfectDays: 0
+      });
+    };
+  }, [getData]); // Remove auth.onAuthStateChanged as it's not needed here
+
+  useEffect(() => {
+    // Keep the auth state listener separate
+    const unsubscribe = auth.onAuthStateChanged(user => {
+      if (!user) {
+        setMetrics([]);
+        setAwards({
+          streak: 0,
+          totalDays: 0,
+          averageAccuracy: 0,
+          perfectDays: 0
+        });
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     const calculatedAwards = calculateAwards(metrics);
@@ -229,8 +292,8 @@ export default function Metrics() {
                   <MetricsGraphElement 
                     key={item.date}
                     values={[
-                      displayConfig.tracking === "protein" ? item.protein : item.calories,
-                      displayConfig.tracking === "protein" ? item.proteingoal : item.caloriesgoal,
+                      item.actual[displayConfig.tracking],
+                      item.goals[displayConfig.tracking],
                       colors.greenColor,
                       displayConfig.barWidth,
                       displayConfig.tracking === "protein" ? displayConfig.maxProtein : displayConfig.maxCalories,
@@ -246,10 +309,16 @@ export default function Metrics() {
           </View>
           <View style={[{width: '100%', flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 15, marginTop: 5}]}>
             <Text style={{color: colors.text}}>
-              {getDisplayData[0]?.date.split(' ')[1] + ' ' + getDisplayData[0]?.date.split(' ')[2] + (time >= 3 ? ' ' + getDisplayData[0]?.date.split(' ')[3] : '')}
+              {getDisplayData.length > 0 
+                ? `${new Date(getDisplayData[0].date).toDateString().split(' ')[1]} ${new Date(getDisplayData[0].date).toDateString().split(' ')[2]}${time >= 3 ? ' ' + new Date(getDisplayData[0].date).toDateString().split(' ')[3] : ''}`
+                : ''
+              }
             </Text>
             <Text style={{color: colors.text}}>
-              {getDisplayData[getDisplayData.length - 1]?.date.split(' ')[1] + ' ' + getDisplayData[getDisplayData.length - 1]?.date.split(' ')[2]}
+              {getDisplayData.length > 0
+                ? `${new Date(getDisplayData[getDisplayData.length - 1].date).toDateString().split(' ')[1]} ${new Date(getDisplayData[getDisplayData.length - 1].date).toDateString().split(' ')[2]}${time >= 3 ? ' ' + new Date(getDisplayData[getDisplayData.length - 1].date).toDateString().split(' ')[3] : ''}`
+                : ''
+              }
             </Text>
           </View>
         </View>

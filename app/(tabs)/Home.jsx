@@ -1,16 +1,13 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, Modal, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useNavigation } from '@react-navigation/native';
 import { useSQLiteContext } from 'expo-sqlite';
-import { useCallback, useState } from 'react';
 
 import PercentCompletionGraph from "../../components/PercentCompletionGraph";
 import HorizontalBarChart from "../../components/HorizontalBarChart";
 import DetailsModal from "../DetailsModal";
 import LoggedFoodItem from '@/components/LoggedFoodItem';
-
 
 import { useAppTheme } from '../../hooks/colorScheme';
 
@@ -211,7 +208,7 @@ export default function Home({ navigation }) {  // Add navigation prop
         <FlatList
           ListEmptyComponent={() => (
             day === today ? (
-              <Text style={{color: colors.text, textAlign: 'center'}}>Visit Track to add foods...</Text>
+              <Text style={{color: colors.text, textAlign: 'center'}}>Visit Track to Add Foods</Text>
             ) : null
           )}
           data={foodData.filter(item => item.day === day)}
