@@ -45,16 +45,6 @@ export default function App() {
                   carb INTEGER,
                   fat INTEGER
               );
-
-              CREATE TABLE IF NOT EXISTS 
-              metrics(
-                  id INTEGER PRIMARY KEY AUTOINCREMENT,
-                  date TEXT UNIQUE,
-                  calories INTEGER,
-                  protein INTEGER,
-                  caloriesgoal INTEGER,
-                  proteingoal INTEGER
-              );
           `);
       } catch (error) {
           console.error("Error creating database: ", error);

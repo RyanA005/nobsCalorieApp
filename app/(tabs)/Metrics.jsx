@@ -1,6 +1,5 @@
 import { View, Text, StyleSheet, ScrollView, Animated, Dimensions, DeviceEventEmitter } from 'react-native'
 import React, { useEffect, useRef, useMemo, useCallback } from 'react'
-import { useSQLiteContext } from 'expo-sqlite';
 import { useState } from 'react';
 import { TouchableOpacity } from 'react-native';
 import { AntDesign, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
@@ -16,6 +15,10 @@ import { assembleMetricsHistory } from '../../functions/assembleMetricsHistory';
 export default function Metrics() {
   
   const colors = useAppTheme();
+
+  const smartTruncate = (text, limit) => {
+    return text.length > limit ? text.slice(0, limit) + '...' : text;
+  };
 
   const [metrics, setMetrics] = useState([]);
   const [awards, setAwards] = useState({
@@ -36,8 +39,6 @@ export default function Metrics() {
   const [stat, setStat] = useState(1);
   const [time, setTime] = useState(1);
 
-  const db = useSQLiteContext();
-  const fadeAnim = useRef(new Animated.Value(0)).current;
   const auth = getAuth(FIREBASE_APP);
 
   // Memoize static data
@@ -69,7 +70,7 @@ export default function Metrics() {
         return;
       }
 
-      const metricsData = await assembleMetricsHistory(auth.currentUser.uid, db);
+      const metricsData = await assembleMetricsHistory(auth.currentUser.uid);
       if (!Array.isArray(metricsData) || metricsData.length === 0) {
         console.warn('No metrics data returned');
         setMetrics([]);
@@ -93,7 +94,7 @@ export default function Metrics() {
       console.error("Error fetching metrics:", error);
       setMetrics([]);
     }
-  }, [db, displayConfig.maxItems, findMax, auth.currentUser]);
+  }, [displayConfig.maxItems, findMax, auth.currentUser]);
   const getDisplayData = useMemo(() => {
     const maxForDisplay = 120;
     if (!metrics.length) return [];
@@ -277,7 +278,26 @@ export default function Metrics() {
           </View>
           <View style={[{flexDirection: "row", marginTop: 10, width: '100%'}]}>
           <View style={[{backgroundColor: colors.text, width: 2, height: 190, marginRight: 5}]}>
-            <Text adjustsFontSizeToFit={true} style={[{fontSize: 8, backgroundColor: colors.boxes, color: colors.text, alignSelf: 'center', width: 20, height: 12, zIndex: 10}]}>{displayConfig.tracking=='protein' ? displayConfig.maxProtein+'g' : displayConfig.maxCalories}</Text>
+            <Text 
+              numberOfLines={1} 
+              style={[{
+                fontSize: 8, 
+                backgroundColor: colors.boxes, 
+                color: colors.text, 
+                alignSelf: 'center',
+                width: 30,
+                height: 12,
+                zIndex: 10,
+                textAlign: 'center'
+              }]}
+            >
+              {smartTruncate(
+                displayConfig.tracking === 'protein' 
+                  ? Math.round(displayConfig.maxProtein) + 'g'
+                  : Math.round(displayConfig.maxCalories) + '',
+                5
+              )}
+            </Text>
             <View style={[{backgroundColor: colors.text, width: 10, height: 2, alignSelf: 'center'}]}></View>
           </View>
 

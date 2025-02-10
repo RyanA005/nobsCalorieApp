@@ -18,62 +18,10 @@ const createEmptyMetrics = async (date) => {
     };
 };
 
-const getMetricsForDay = async (db, date) => {
-    if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
-        console.warn('Invalid date provided to getMetricsForDay:', date);
-        return null;
-    }
-
-    const startOfDay = new Date(date);
-    startOfDay.setHours(0, 0, 0, 0);
-    
+export const assembleMetricsHistory = async (userId) => {
     try {
-        const dateString = startOfDay.toDateString();
-        console.log('Searching for date:', dateString);
-        
-        // Modified query to properly sum up all items for the day
-        const foodDB = await db.getAllAsync(
-            `SELECT 
-                SUM(CAST((cal * qty / CASE WHEN baseQty = 0 OR baseQty IS NULL THEN 100 ELSE baseQty END) AS FLOAT)) as totalCal,
-                SUM(CAST((protein * qty / CASE WHEN baseQty = 0 OR baseQty IS NULL THEN 100 ELSE baseQty END) AS FLOAT)) as totalProtein,
-                SUM(CAST((carb * qty / CASE WHEN baseQty = 0 OR baseQty IS NULL THEN 100 ELSE baseQty END) AS FLOAT)) as totalCarb,
-                SUM(CAST((fat * qty / CASE WHEN baseQty = 0 OR baseQty IS NULL THEN 100 ELSE baseQty END) AS FLOAT)) as totalFat
-            FROM foodhistory 
-            WHERE day = ?`,
-            [dateString]
-        );
-
-        if (!Array.isArray(foodDB) || !foodDB[0]) {
-            console.warn('Invalid foodDB result:', foodDB);
-            return await createEmptyMetrics(startOfDay);
-        }
-
-        console.log('Day totals:', foodDB[0]); // Debug log
-
-        const totals = {
-            calories: Math.round(Number(foodDB[0].totalCal) || 0),
-            protein: Math.round(Number(foodDB[0].totalProtein) || 0),
-            carbs: Math.round(Number(foodDB[0].totalCarb) || 0),
-            fat: Math.round(Number(foodDB[0].totalFat) || 0)
-        };
-
-        const emptyMetrics = await createEmptyMetrics(startOfDay);
-        
-        return {
-            date: startOfDay,
-            actual: totals,
-            goals: emptyMetrics.goals
-        };
-    } catch (error) {
-        console.error('Error in getMetricsForDay:', error);
-        return await createEmptyMetrics(startOfDay);
-    }
-};
-
-export const assembleMetricsHistory = async (userId, db) => {
-    try {
-        if (!userId || !db) {
-            console.error('Missing required parameters:', { userId: !!userId, db: !!db });
+        if (!userId) {
+            console.error('Missing userId parameter');
             return [];
         }
 
@@ -82,25 +30,14 @@ export const assembleMetricsHistory = async (userId, db) => {
         
         // Ensure we have data for the past 7 days minimum
         const sevenDaysAgo = new Date(today);
-        sevenDaysAgo.setDate(today.getDate() - 6); // -6 because today counts as 1
+        sevenDaysAgo.setDate(today.getDate() - 6);
 
-        const yesterday = new Date(today);
-        yesterday.setDate(yesterday.getDate() - 1);
-
-        // Get yesterday and today's metrics first
-        const [yesterdayMetrics, todayMetrics] = await Promise.all([
-            getMetricsForDay(db, yesterday),
-            getMetricsForDay(db, today)
-        ]);
-
-        let historicalMetrics = [];
+        let allMetrics = [];
         try {
             const metricsRef = collection(FIREBASE_DB, "users", userId, "metrics");
-            const querySnapshot = await getDocs(
-                query(metricsRef, where('date', '<', Timestamp.fromDate(yesterday)))
-            );
+            const querySnapshot = await getDocs(metricsRef);
             
-            historicalMetrics = querySnapshot.docs
+            allMetrics = querySnapshot.docs
                 .map(doc => {
                     try {
                         const data = doc.data();
@@ -139,26 +76,16 @@ export const assembleMetricsHistory = async (userId, db) => {
                         return null;
                     }
                 })
-                .filter(Boolean);
-        } catch (e) {
-            console.warn('Error fetching historical metrics:', e);
-        }
+                .filter(Boolean)
+                .sort((a, b) => a.date - b.date);
 
-        // Combine all metrics with recent ones taking precedence
-        const allMetrics = [
-            ...historicalMetrics,
-            yesterdayMetrics,
-            todayMetrics
-        ].filter(metric => 
-            metric && 
-            metric.date instanceof Date && 
-            !isNaN(metric.date.getTime())
-        ).sort((a, b) => a.date - b.date);
+        } catch (e) {
+            console.warn('Error fetching metrics:', e);
+        }
 
         // Fill gaps and ensure minimum 7 days
         if (allMetrics.length > 0) {
             const filledMetrics = [];
-            // Use either the earliest date from data or 7 days ago, whichever is earlier
             const startDate = new Date(Math.min(
                 sevenDaysAgo.getTime(),
                 allMetrics[0].date.getTime()

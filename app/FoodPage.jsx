@@ -5,6 +5,8 @@ import { AntDesign } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TouchableOpacity } from 'react-native';
 import { useSQLiteContext } from 'expo-sqlite';
+import { FIREBASE_AUTH } from '../FirebaseConfig';
+import { storeMetrics } from '../functions/firebaseDB'; // THE PROBLEM IS THAT WHEN NOT LOGGING FOR FIRST TIME DATE IS UNKNOWN
 
 import { getFoodData } from '../functions/getFoodData';
 import MacroSplitGraph from '../components/MacroSplitGraph';
@@ -30,8 +32,28 @@ export default function FoodPage() {
   const [goals, setGoals] = useState({});
   const [multiplier, setMultiplier] = useState(1);
   const [day , setDay] = useState(2);
+  const [usingDBDate, setUsingDBDate] = useState(false);
+  const [dbDate, setDbDate] = useState(null);
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
+  const database = useSQLiteContext();
+
+  const updateFireBase = async () => {
+    let targetDate;
+    if (usingDBDate && dbDate) {
+      targetDate = dbDate;
+    } else {
+      targetDate = new Date();
+      targetDate.setDate(targetDate.getDate() - (2 - day));
+      targetDate.setHours(0, 0, 0, 0); // Reset time to midnight
+    }
+    try {
+      await storeMetrics(FIREBASE_AUTH.currentUser, database, targetDate);
+      console.log('Success', 'Data sent to Firebase for date:', targetDate.toDateString());
+    } catch (error) {
+      console.error('Error', 'Failed to send data.');
+    }
+  };
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -41,10 +63,39 @@ export default function FoodPage() {
       headerTintColor: colors.accent,
     });
   }, [navigation, name]);
+
   useEffect(() => {
-    retriveFoodData();
-    loadGoals();
-  }, [name]);
+    const loadInitialData = async () => {
+      await retriveFoodData();
+      await loadGoals();
+      
+      // Load day from database if in edit mode
+      if (editMode && id) {
+        try {
+          const result = await database.getFirstAsync(
+            "SELECT day FROM foodhistory WHERE id = ?;",
+            [id]
+          );
+          if (result) {
+            const dateString = result.day;
+            const foodDate = new Date(dateString);
+            setDbDate(foodDate);
+            setUsingDBDate(true);
+            
+            // Still calculate UI day for display purposes
+            const currentDate = new Date();
+            const diffDays = Math.round((foodDate - currentDate) / (1000 * 60 * 60 * 24));
+            const uiDay = diffDays + 2; // Convert offset (-1,0,1) to UI day (1,2,3)
+            setDay(uiDay);
+          }
+        } catch (error) {
+          console.error("Error loading day from database:", error);
+        }
+      }
+    };
+
+    loadInitialData();
+  }, [name, editMode, id]);
 
   useEffect(() => {
     const currentQty = parseInt(qty);
@@ -106,7 +157,6 @@ export default function FoodPage() {
       //console.log("retrieved ->", foodDataObj.name, foodDataObj.baseQty, foodDataObj.cal, foodDataObj.protein, foodDataObj.carbs, foodDataObj.fats);
     }
   };
-  const database = useSQLiteContext();
 
   const logFood = async () => {
     const workingQty = parseInt(qty);
@@ -122,7 +172,8 @@ export default function FoodPage() {
     const baseQty = isCustom ? foodData.baseQty : 100;
     const currentDate = new Date();
     const targetDate = new Date(currentDate);
-    targetDate.setDate(currentDate.getDate() - (2 - day)); // Convert UI day (1,2,3) to offset (-1,0,1))
+    targetDate.setDate(currentDate.getDate() - (2 - day));
+    targetDate.setHours(0, 0, 0, 0); // Reset time to midnight
     
     // Store base values for non-custom foods, and calculated values for custom foods
     const foodValues = isCustom ? {
@@ -153,6 +204,7 @@ export default function FoodPage() {
             targetDate.toDateString()
           ]
         );
+        await updateFireBase(); // Move Firebase update after database update
         DeviceEventEmitter.emit('foodHistoryChanged');
         navigation.goBack();
       }
@@ -161,6 +213,7 @@ export default function FoodPage() {
       }
     } else { // in edit mode
       try {
+        updateFireBase();
         await database.runAsync(
           "UPDATE foodhistory SET name = ?, qty = ?, baseQty = ?, cal = ?, protein = ?, carb = ?, fat = ?, iscustom = ? WHERE id = ?;", 
           [
@@ -186,11 +239,29 @@ export default function FoodPage() {
 
   const handleDelete = async (id) => {
     try {
-      await database.runAsync("DELETE FROM foodhistory WHERE id = ?;", [id]);
-      DeviceEventEmitter.emit('foodHistoryChanged');
-      navigation.goBack();
-    } catch (error) {console.log(error)}
-  }
+      const result = await database.getFirstAsync(
+        "SELECT day FROM foodhistory WHERE id = ?;",
+        [id]
+      );
+      
+      if (result) {
+        const dateString = result.day;
+        const targetDate = new Date(dateString);
+        
+        await database.runAsync(
+          "DELETE FROM foodhistory WHERE id = ?;",
+          [id]
+        );
+        
+        await updateFireBase(); // This will use the day state that was set when loading the page
+        DeviceEventEmitter.emit('foodHistoryChanged');
+        navigation.goBack();
+      }
+    } catch (error) {
+      console.error("Error in handleDelete:", error);
+    }
+  };
+
   const handleCustomDelete = async (name) => {
     Alert.alert(
       "Confirm Delete",
@@ -204,55 +275,29 @@ export default function FoodPage() {
           text: "Delete",
           onPress: async () => {
             try {
-              // Try deleting from foodhistory first
-              const deleteHistoryResult = await database.runAsync(
+              await database.runAsync(
                 "DELETE FROM foodhistory WHERE name = ? AND iscustom = 1;",
                 [name]
               );
-              //console.log("Foodhistory delete result:", deleteHistoryResult);
-
-              // Then delete from customfoods
-              const deleteCustomResult = await database.runAsync(
+              await database.runAsync(
                 "DELETE FROM customfoods WHERE name = ?;",
                 [name]
               );
-              //console.log("Customfoods delete result:", deleteCustomResult);
-
-              // Verify the deletions
-              const historyCheck = await database.getFirstAsync(
-                "SELECT COUNT(*) as count FROM foodhistory WHERE name = ? AND iscustom = 1;",
-                [name]
-              );
-              const customCheck = await database.getFirstAsync(
-                "SELECT COUNT(*) as count FROM customfoods WHERE name = ?;",
-                [name]
-              );
               
-              //console.log("Remaining in history:", historyCheck?.count);
-              //console.log("Remaining in customfoods:", customCheck?.count);
-
-              if (historyCheck?.count === 0 && customCheck?.count === 0) {
-                Alert.alert(
-                  "Success",
-                  "Custom food deleted successfully",
-                  [{ text: "OK", onPress: () => navigation.goBack() }]
-                );
-              } else {
-                throw new Error("Deletion verification failed");
-              }
+              await updateFireBase();
+              DeviceEventEmitter.emit('foodHistoryChanged');
+              navigation.goBack();
             } catch (error) {
               console.error("Error in deletion:", error);
-              Alert.alert(
-                "Error",
-                "Failed to delete food item completely. Please try again."
-              );
+              Alert.alert("Error", "Failed to delete food item completely. Please try again.");
             }
           },
           style: "destructive"
         }
       ]
     );
-  }
+  };
+
   const updateCustomFood = async () => {
     const customProtein = ProteinQty || foodData.protein;
     const customCarbs = CarbQty || foodData.carbs;
@@ -275,35 +320,28 @@ export default function FoodPage() {
           text: "Update",
           onPress: async () => {
     try {
-      database.runAsync("UPDATE customfoods SET cal = ?, protein = ?, carb = ?, fat = ? WHERE name = ?;", 
-      [
-        customCalories,
-        customProtein,
-        customCarbs,
-        customFats,
-        name
-      ]);
-      console.log("sucessfully EDITED custom food ->", name);
-      database.runAsync("UPDATE foodhistory SET cal = ?, protein = ?, carb = ?, fat = ? WHERE name = ? AND iscustom = 1;",
-      [
-        customCalories,
-        customProtein,
-        customCarbs,
-        customFats,
-        name
-      ]);
-      alert("Changes saved");
+      // Update both tables
+      await database.runAsync(
+        "UPDATE customfoods SET cal = ?, protein = ?, carb = ?, fat = ? WHERE name = ?;",
+        [customCalories, customProtein, customCarbs, customFats, name]
+      );
+      await database.runAsync(
+        "UPDATE foodhistory SET cal = ?, protein = ?, carb = ?, fat = ? WHERE name = ? AND iscustom = 1;",
+        [customCalories, customProtein, customCarbs, customFats, name]
+      );
+      
+      await updateFireBase();
+      setCustomWasEdited(false);
       navigation.goBack();
     }
     catch (error) {
-      console.log(error);
-      alert("Error saving changes");
+      console.error("Error updating custom food:", error);
+      Alert.alert("Error", "Failed to update food item.");
     }
-    setCustomWasEdited(false);
-    retriveFoodData();
   }, style  : "destructive"
   }]);
 }
+
   const goToPage = () => {
     if(customWasEdited) {
       Alert.alert("Make sure to save changes before logging food");
@@ -410,7 +448,6 @@ export default function FoodPage() {
   // console.log("fromQuickAdd:", customAdjustmentPage, ", editMode:", editMode);
   // console.log("values: ", values, "multiplier: ", multiplier);
   // console.log("parsedData: ", ProteinQty, CarbQty, FatQty);
-
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
