@@ -78,11 +78,57 @@ const Login = () => {
     }, [])
 
     const addUserToCollection = async (email: string, uid: string) => {
+        const defaultGoals = {
+            protein: '150',
+            carbs: '150',
+            fats: '100',
+            dailyCalories: '2100',
+          
+            transFat: '2',
+            saturatedFat: '20',
+            polyunsaturatedFat: '17',
+            monounsaturatedFat: '44',
+          
+            netCarbs: '53',
+            sugar: '25',
+            fiber: '28',
+          
+            cholesterol: '300',
+            sodium: '2300',
+            calcium: '1000',
+            magnesium: '400',
+            phosphorus: '700',
+            potassium: '3400',
+          
+            iron: '18',
+            copper: '900',
+            zinc: '11',
+            manganese: '2.3',
+            selenium: '55',
+          
+            vitaminA: '900',
+            vitaminD: '20',
+            vitaminE: '15',
+            vitaminK: '120',
+            
+            vitaminC: '90',
+            vitaminB1: '1.2',
+            vitaminB12: '2.4',
+            vitaminB2: '1.3',
+            vitaminB3: '16',
+            vitaminB5: '5',
+            vitaminB6: '1.7',
+            folate: '400',
+          };
+
         const userDocRef = doc(FIREBASE_DB, "users", uid);
         await setDoc(userDocRef, {
             email: email,
             createdAt: new Date(),
         });
+        if (!(await AsyncStorage.getItem('userGoals'))) {
+            await AsyncStorage.setItem('userGoals', JSON.stringify(defaultGoals));
+        }
     }
 
     return (

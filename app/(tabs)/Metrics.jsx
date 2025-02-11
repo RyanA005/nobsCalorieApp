@@ -36,12 +36,12 @@ export default function Metrics() {
     },
     maxItems: 7,
     barWidth: 30,
-    tracking: "calories", // Changed from "protein" to "calories"
+    tracking: "calories",
     spacing: 10
   });
   
-  const [stat, setStat] = useState('calories'); // Changed from 1 to 'calories'
-  const [time, setTime] = useState(1); // Make sure this is explicitly declared
+  const [stat, setStat] = useState('calories');
+  const [time, setTime] = useState(1);
 
   const auth = getAuth(FIREBASE_APP);
 
