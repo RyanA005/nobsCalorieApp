@@ -19,7 +19,7 @@ export const calculateAwards = (metrics) => {
     currentDate.setHours(0, 0, 0, 0);
 
     // Skip empty days
-    if (metric.actual.calories === 0 && metric.actual.protein === 0) {
+    if (metric.actual.calories === 0) {
       break;
     }
 
@@ -55,16 +55,22 @@ export const calculateAwards = (metrics) => {
     // Perfect days calculation (within 10% of goals)
     const calorieAccuracy = metric.actual.calories / metric.goals.calories;
     const proteinAccuracy = metric.actual.protein / metric.goals.protein;
+    const fatAccuracy = metric.actual.fat / metric.goals.fat;
+    const carbsAccuracy = metric.actual.carbs / metric.goals.carbs;
     
     if (calorieAccuracy >= 0.9 && calorieAccuracy <= 1.1 &&
-        proteinAccuracy >= 0.9 && proteinAccuracy <= 1.1) {
+        proteinAccuracy >= 0.9 && proteinAccuracy <= 1.1 && 
+        fatAccuracy >= 0.9 && fatAccuracy <= 1.1 &&
+        carbsAccuracy >= 0.9 && carbsAccuracy <= 1.1) {
       stats.perfectDays++;
     }
 
     // Accuracy calculation
     const dayProteinAccuracy = Math.min(metric.actual.protein / metric.goals.protein, 1) * 100;
     const dayCalorieAccuracy = Math.min(metric.actual.calories / metric.goals.calories, 1) * 100;
-    stats.accuracySum += (dayProteinAccuracy + dayCalorieAccuracy) / 2;
+    const dayFatAccuracy = Math.min(metric.actual.fat / metric.goals.fat, 1) * 100;
+    const dayCarbsAccuracy = Math.min(metric.actual.carbs / metric.goals.carbs, 1) * 100;
+    stats.accuracySum += (dayProteinAccuracy + dayCalorieAccuracy + dayFatAccuracy + dayCarbsAccuracy) / 4;
   });
 
   return {

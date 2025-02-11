@@ -14,12 +14,12 @@ export const getMetricsForDay = async (db, date) => {
             let metrics = { calories: 0, protein: 0, carbs: 0, fat: 0 };
             results.forEach(item => {
                 const multiplier = item.qty / (item.baseQty || 100);
-                metrics.calories += Number(item.cal) * multiplier || 0;
-                metrics.protein += Number(item.protein) * multiplier || 0;
-                metrics.carbs += Number(item.carb) * multiplier || 0;
-                metrics.fat += Number(item.fat) * multiplier || 0;
+                metrics.calories += Math.round(Number(item.cal) * multiplier || 0);
+                metrics.protein += Math.round(Number(item.protein) * multiplier || 0);
+                metrics.carbs += Math.round(Number(item.carb) * multiplier || 0);
+                metrics.fat += Math.round(Number(item.fat) * multiplier || 0);
             });
-            return metrics;
+            return (metrics);
           } catch (error) {
             console.error('Error loading food data:', error);
           }

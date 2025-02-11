@@ -49,7 +49,7 @@ export default function FoodPage() {
     }
     try {
       await storeMetrics(FIREBASE_AUTH.currentUser, database, targetDate);
-      console.log('Success', 'Data sent to Firebase for date:', targetDate.toDateString());
+      //console.log('Success', 'Data sent to Firebase for date:', targetDate.toDateString());
     } catch (error) {
       console.error('Error', 'Failed to send data.');
     }
@@ -306,7 +306,7 @@ export default function FoodPage() {
 
     console.log("Updating custom food:", name, customCalories, customProtein, customCarbs, customFats);
 
-    console.log("Alternates:", ProteinQty, CarbQty, FatQty);
+    //console.log("Alternates:", ProteinQty, CarbQty, FatQty);
 
     Alert.alert(
       "Confirm Update",

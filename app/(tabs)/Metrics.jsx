@@ -28,23 +28,29 @@ export default function Metrics() {
     perfectDays: 0
   });
   const [displayConfig, setDisplayConfig] = useState({
-    maxProtein: 200,
-    maxCalories: 2100,
+    maxValues: {
+      protein: 200,
+      calories: 2100,
+      fats: 70,
+      carbs: 250
+    },
     maxItems: 7,
     barWidth: 30,
-    tracking: "protein",
+    tracking: "calories", // Changed from "protein" to "calories"
     spacing: 10
   });
   
-  const [stat, setStat] = useState(1);
-  const [time, setTime] = useState(1);
+  const [stat, setStat] = useState('calories'); // Changed from 1 to 'calories'
+  const [time, setTime] = useState(1); // Make sure this is explicitly declared
 
   const auth = getAuth(FIREBASE_APP);
 
   // Memoize static data
   const statSelectorData = useMemo(() => ([
-    {value: 1, label: 'Protein'},
-    {value: 2, label: 'Calories'}
+    { value: 'calories', label: 'Calories' }, // Calories first
+    { value: 'protein', label: 'Protein' },
+    { value: 'fat', label: 'Fat' },
+    { value: 'carbs', label: 'Carbs' }
   ]), []);
 
   const timeSelectorData = useMemo(() => [
@@ -53,6 +59,16 @@ export default function Metrics() {
     ...(metrics.length >= 40 ? [{value: 3, label: 'Year'}] : []),
     ...(metrics.length >= 365 ? [{value: 4, label: 'All Time'}] : [])
   ], [metrics.length]);
+
+  const getUnitForNutrient = useCallback((nutrient) => {
+    const units = {
+      protein: 'g',
+      fats: 'g',
+      carbs: 'g',
+      calories: ''
+    };
+    return units[nutrient] || '';
+  }, []);
 
   const findMax = useCallback((array) => {
     return Math.max(
@@ -84,10 +100,14 @@ export default function Metrics() {
       const relevantData = reversedData.slice(0, currentMaxItems);
       
       if (relevantData.length > 0) {
+        const maxValues = {};
+        Object.keys(relevantData[0].actual).forEach(nutrient => {
+          maxValues[nutrient] = findMax(relevantData);
+        });
+
         setDisplayConfig(prev => ({
           ...prev,
-          maxProtein: findMax(relevantData),
-          maxCalories: findMax(relevantData)
+          maxValues
         }));
       }
     } catch (error) {
@@ -116,7 +136,7 @@ export default function Metrics() {
     setStat(item.value);
     setDisplayConfig(prev => ({
       ...prev,
-      tracking: item.value === 1 ? "protein" : "calories"
+      tracking: item.value
     }));
   }, []);
 
@@ -292,9 +312,8 @@ export default function Metrics() {
               }]}
             >
               {smartTruncate(
-                displayConfig.tracking === 'protein' 
-                  ? Math.round(displayConfig.maxProtein) + 'g'
-                  : Math.round(displayConfig.maxCalories) + '',
+                Math.round(displayConfig.maxValues[displayConfig.tracking]) + 
+                getUnitForNutrient(displayConfig.tracking),
                 5
               )}
             </Text>
@@ -316,7 +335,7 @@ export default function Metrics() {
                       item.goals[displayConfig.tracking],
                       colors.greenColor,
                       displayConfig.barWidth,
-                      displayConfig.tracking === "protein" ? displayConfig.maxProtein : displayConfig.maxCalories,
+                      displayConfig.maxValues[displayConfig.tracking],
                     ]}
                   />
                 ))}
@@ -336,7 +355,7 @@ export default function Metrics() {
             </Text>
             <Text style={{color: colors.text}}>
               {getDisplayData.length > 0
-                ? `${new Date(getDisplayData[getDisplayData.length - 1].date).toDateString().split(' ')[1]} ${new Date(getDisplayData[getDisplayData.length - 1].date).toDateString().split(' ')[2]}${time >= 3 ? ' ' + new Date(getDisplayData[getDisplayData.length - 1].date).toDateString().split(' ')[3] : ''}`
+                ? `${new Date().toDateString().split(' ')[1]} ${new Date().toDateString().split(' ')[2]}${time >= 3 ? ' ' + new Date(getDisplayData[getDisplayData.length - 1].date).toDateString().split(' ')[3] : ''}`
                 : ''
               }
             </Text>

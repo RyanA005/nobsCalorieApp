@@ -5,7 +5,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const createEmptyMetrics = async (date) => {
     const savedGoals = await AsyncStorage.getItem('userGoals');
     const goals = savedGoals ? JSON.parse(savedGoals) : {};
-    
     return {
         date,
         actual: { calories: 0, protein: 0, carbs: 0, fat: 0 },
@@ -104,7 +103,7 @@ export const assembleMetricsHistory = async (userId) => {
                     await createEmptyMetrics(new Date(currentDate))
                 );
             }
-
+            console.log('Filled metrics:', filledMetrics);
             return filledMetrics;
         }
 

@@ -27,8 +27,8 @@ export const storeMetrics = async (userId, db, date) => {
         const metricsDocRef = doc(FIREBASE_DB, "users", uid, "metrics", formattedDate);
         await setDoc(metricsDocRef, docContent, { merge: true });
         
-        console.log('Historical metrics stored successfully:', docContent);
-        console.log('Metrics stored at:', formattedDate);
+        //console.log('Historical metrics stored successfully:', docContent);
+        //console.log('Metrics stored at:', formattedDate);
 
     } catch (error) {
         console.error('Error storing metrics:', error);
