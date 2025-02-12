@@ -1,5 +1,5 @@
-import { View, Text, StyleSheet, ScrollView, Animated, Dimensions, DeviceEventEmitter } from 'react-native'
-import React, { useEffect, useRef, useMemo, useCallback } from 'react'
+import { View, Text, StyleSheet, ScrollView, DeviceEventEmitter } from 'react-native'
+import React, { useEffect, useMemo, useCallback } from 'react'
 import { useState } from 'react';
 import { TouchableOpacity } from 'react-native';
 import { AntDesign, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
@@ -171,7 +171,7 @@ export default function Metrics() {
       ...prev,
       maxItems: newMaxItems,
       barWidth: newBarWidth,
-      spacing: item.value === 4 ? 2 : 10 // Reduce spacing for All Time view
+      spacing: item.value === 4 ? 2 : 10
     }));
   }, [metrics.length]);
 
@@ -198,7 +198,6 @@ export default function Metrics() {
       await getData();
     };
 
-    // Subscribe to food history changes
     const subscription = DeviceEventEmitter.addListener('foodHistoryChanged', loadData);
 
     loadData();
@@ -214,10 +213,9 @@ export default function Metrics() {
         perfectDays: 0
       });
     };
-  }, [getData]); // Remove auth.onAuthStateChanged as it's not needed here
+  }, [getData]);
 
   useEffect(() => {
-    // Keep the auth state listener separate
     const unsubscribe = auth.onAuthStateChanged(user => {
       if (!user) {
         setMetrics([]);

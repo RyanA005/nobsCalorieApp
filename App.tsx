@@ -10,8 +10,6 @@ import { TabNavigation } from './app/(tabs)/TabNavigation';
 import { FIREBASE_AUTH } from './FirebaseConfig';
 import Goals from './app/Goals';
 
-
-
 const Stack = createNativeStackNavigator();
 
 export default function App() {

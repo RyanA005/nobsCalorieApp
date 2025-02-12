@@ -11,6 +11,9 @@ import LoggedFoodItem from '@/components/LoggedFoodItem';
 
 import { useAppTheme } from '../../hooks/colorScheme';
 
+import { FIREBASE_AUTH } from '../../FirebaseConfig';
+import { checkDayAndUpdate } from '../../functions/firebaseDB';
+
 export default function Home({ navigation }) {  // Add navigation prop
 
   const colors = useAppTheme();
@@ -133,6 +136,9 @@ export default function Home({ navigation }) {  // Add navigation prop
     }
   };
 
+  useEffect(() => { 
+    checkDayAndUpdate(FIREBASE_AUTH.currentUser, database, new Date());
+   }, []);
   return (
     <View style={[styles.container, {backgroundColor: colors.background}]}>
       <View style={[styles.banner, {backgroundColor: colors.boxes}]}>

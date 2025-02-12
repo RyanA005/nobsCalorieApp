@@ -3,6 +3,7 @@ import { View, Text, Button, Alert, Switch, StyleSheet } from 'react-native';
 import { FIREBASE_AUTH } from '../../FirebaseConfig';
 import { signOut } from 'firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { checkDayAndUpdate } from '../../functions/firebaseDB';
 
 import { useAppTheme } from '../../hooks/colorScheme';
 import { storeMetrics } from '../../functions/firebaseDB';
@@ -46,17 +47,12 @@ export default function Settings() {
 
   const db = useSQLiteContext();
   const date = new Date();
-  const date2 = new Date();
-  date2.setDate(date.getDate() - 3);
-  console.log('date2:', date2);
-  const sendTestData = async () => {
-    try {
-      await storeMetrics(FIREBASE_AUTH.currentUser, db, date2);
-      Alert.alert('Success', 'Test data sent to Firebase.');
-    } catch (error) {
-      Alert.alert('Error', 'Failed to send test data.');
-  }
-};
+  date.setDate(date.getDate() + 5);
+
+  const doTest = async () => {
+    console.log('test! ');
+    await checkDayAndUpdate(FIREBASE_AUTH.currentUser, db, date);
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -70,7 +66,7 @@ export default function Settings() {
       <Button
         style={styles.button}
         title="test"
-        onPress={sendTestData}
+        onPress={doTest}
       />
     </View>
   );
