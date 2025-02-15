@@ -27,56 +27,33 @@ export const assembleMetricsHistory = async (userId) => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         
-        // Ensure we have data for the past 7 days minimum
         const sevenDaysAgo = new Date(today);
         sevenDaysAgo.setDate(today.getDate() - 6);
 
         let allMetrics = [];
         try {
             const metricsRef = collection(FIREBASE_DB, "users", userId, "metrics");
-            const querySnapshot = await getDocs(metricsRef);
-            
-            allMetrics = querySnapshot.docs
-                .map(doc => {
-                    try {
-                        const data = doc.data();
-                        let date = null;
-                        
-                        if (data.date?.toDate) {
-                            date = data.date.toDate();
-                        } else if (data.date instanceof Date) {
-                            date = data.date;
-                        } else if (typeof data.date === 'string') {
-                            date = new Date(data.date);
-                        } else {
-                            date = new Date(doc.id);
-                        }
+            const q = query(metricsRef);
+            const querySnapshot = await getDocs(q);
 
-                        if (!date || isNaN(date.getTime())) return null;
-
-                        return {
-                            ...data,
-                            date,
-                            actual: {
-                                calories: Number(data.actual?.calories) || 0,
-                                protein: Number(data.actual?.protein) || 0,
-                                carbs: Number(data.actual?.carbs) || 0,
-                                fat: Number(data.actual?.fat) || 0
-                            },
-                            goals: {
-                                calories: Number(data.goals?.calories) || 0,
-                                protein: Number(data.goals?.protein) || 0,
-                                carbs: Number(data.goals?.carbs) || 0,
-                                fat: Number(data.goals?.fat) || 0
-                            }
-                        };
-                    } catch (e) {
-                        console.warn('Error processing document:', doc.id, e);
-                        return null;
+            allMetrics = querySnapshot.docs.map(doc => {
+                const data = doc.data();
+                return {
+                    date: new Date(doc.id),
+                    actual: {
+                        calories: Number(data.actual?.calories) || 0,
+                        protein: Number(data.actual?.protein) || 0,
+                        carbs: Number(data.actual?.carbs) || 0,
+                        fat: Number(data.actual?.fat) || 0
+                    },
+                    goals: {
+                        calories: Number(data.goals?.calories) || 0,
+                        protein: Number(data.goals?.protein) || 0,
+                        carbs: Number(data.goals?.carbs) || 0,
+                        fat: Number(data.goals?.fat) || 0
                     }
-                })
-                .filter(Boolean)
-                .sort((a, b) => a.date - b.date);
+                };
+            });
 
         } catch (e) {
             console.warn('Error fetching metrics:', e);

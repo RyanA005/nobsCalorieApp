@@ -2,6 +2,7 @@ import { doc, getDoc, setDoc, updateDoc, writeBatch } from "firebase/firestore";
 import { FIREBASE_DB } from '../FirebaseConfig';
 import { getGoalsforDay } from './returnGoals';
 import { getMetricsForDay } from './returnMetrics';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
 // Store metrics for a given day in Firebase
@@ -82,25 +83,24 @@ export const storeInBulk = async (userId, content) => {
         { merge: true }
       );
       console.log("Quarterly data stored in user's metrics collection successfully.");
-  
+      sendToCache(existingData);
     } catch (error) {
       console.error("Error updating quarterly data:", error);
+      
     }
   };
-  
-// checks current date and updates firebase with metrics if needed
-// checkDayAndUpdate(FIREBASE_AUTH.currentUser, db, date);
+
 export const checkDayAndUpdate = async (userId, db, date) => {
     if (!userId || !db || !date) {
         console.error('Missing required parameters for checkDayAndUpdate');
         throw new Error('Missing required parameters for checkDayAndUpdate');
     }
     else {
-        let twoDaysAgo = date;
-        twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
-        twoDaysAgo.setHours(0, 0, 0, 0); // two days ago from passed in date(today)
+        let switchDate = date;
+        switchDate.setDate(switchDate.getDate());
+        switchDate.setHours(0, 0, 0, 0); // two days ago from passed in date(today)
 
-        console.log('Two days ago:', twoDaysAgo);
+        console.log('Two days ago:', switchDate);
 
         const result = await db.getAllAsync("SELECT day FROM foodhistory ORDER BY day DESC LIMIT 1;");
         if (!result.length) {
@@ -111,22 +111,22 @@ export const checkDayAndUpdate = async (userId, db, date) => {
 
         console.log('Most recent day logged:', mostRecentDayLogged);
 
-        if (mostRecentDayLogged > twoDaysAgo) {
+        if (mostRecentDayLogged > switchDate) {
             console.log('no need to update');
         }
-        else { // ex) mostRecentDayLogged = feb 9, twoDaysAgo = feb 10
+        else { // ex) mostRecentDayLogged = feb 9, switchDate = feb 10
             console.log('update needed');
             // calculate time skip
-            let Difference_In_Time = mostRecentDayLogged.getTime() - twoDaysAgo.getTime();
+            let Difference_In_Time = mostRecentDayLogged.getTime() - switchDate.getTime();
             let Difference_In_Days = Math.abs(Math.round(Difference_In_Time / (1000 * 3600 * 24)));
-            console.log("Total number of days between dates:" + twoDaysAgo.toDateString() + " and " + mostRecentDayLogged.toDateString() + " is: " + Difference_In_Days + " days");
+            console.log("Total number of days between dates:" + switchDate.toDateString() + " and " + mostRecentDayLogged.toDateString() + " is: " + Difference_In_Days + " days");
 
             // push days onto firebase
             let docInsert = [];
-            const totalDays = Difference_In_Days + 1; // since we're including both endpoints
+            const totalDays = Difference_In_Days;
             
             for (let i = 0; i < totalDays; i++) {
-              let day = new Date(twoDaysAgo);
+              let day = new Date(switchDate);
               day.setDate(day.getDate() + i);
             
               const newEntry = {
@@ -143,8 +143,40 @@ export const checkDayAndUpdate = async (userId, db, date) => {
             if (docInsert.length > 0) {
                 await storeInBulk(userId, docInsert);
             } else {
-                console.warn("No new data to insert.");
+                console.log("No new data to insert!");
             }
         }
     }
 }
+
+export const sendToCache = async (data) => {
+    if (!data) {
+        console.error('No data to cache');
+        throw new Error('No data to cache');
+    }
+    try {
+        const jsonString = JSON.stringify(data);
+        await AsyncStorage.setItem('cachedData', jsonString);
+        console.log('Data cached successfully');
+        
+        //const cachedData = await getFromCache();
+        //console.log('Verified cached data:', cachedData);
+    } catch (error) {
+        console.error('Error caching data:', error);
+        throw error;
+    }
+};
+
+export const getFromCache = async () => {
+    try {
+        const jsonString = await AsyncStorage.getItem('cachedData');
+        if (!jsonString) {
+            return null;
+        }
+        const parsed = JSON.parse(jsonString);
+        return parsed;
+    } catch (error) {
+        console.error('Error retrieving cached data:', error);
+        return null;
+    }
+};

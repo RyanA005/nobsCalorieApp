@@ -125,6 +125,7 @@ const Login = () => {
         await setDoc(userDocRef, {
             email: email,
             createdAt: new Date(),
+            uid: uid,
         });
         if (!(await AsyncStorage.getItem('userGoals'))) {
             await AsyncStorage.setItem('userGoals', JSON.stringify(defaultGoals));

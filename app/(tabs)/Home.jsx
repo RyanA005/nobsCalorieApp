@@ -136,9 +136,9 @@ export default function Home({ navigation }) {  // Add navigation prop
     }
   };
 
-  useEffect(() => { 
-    checkDayAndUpdate(FIREBASE_AUTH.currentUser, database, new Date());
-   }, []);
+  // useEffect(() => { 
+  //   checkDayAndUpdate(FIREBASE_AUTH.currentUser, database, new Date());
+  //  }, []);
   return (
     <View style={[styles.container, {backgroundColor: colors.background}]}>
       <View style={[styles.banner, {backgroundColor: colors.boxes}]}>
