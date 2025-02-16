@@ -83,6 +83,8 @@ return (
         <AntDesign.Button 
           style={styles.button}
           name="search1" 
+          activeOpacity={0.5}
+          underlayColor={'transparent'}
           onPress={() => performSearch(search)}
           backgroundColor="transparent"
           color={colors.accent}>
@@ -94,6 +96,8 @@ return (
         <AntDesign.Button 
           style={styles.button}
           name="scan1" 
+          activeOpacity={0.5}
+          underlayColor={'transparent'}
           onPress={() => navigation.navigate('Scan')}
           backgroundColor="transparent"
           color={colors.accent}>
@@ -105,6 +109,8 @@ return (
         <AntDesign.Button 
           style={styles.button}
           name="addfile" 
+          activeOpacity={0.5}
+          underlayColor={'transparent'}
           onPress={() => navigation.navigate('QuickAdd')}
           backgroundColor="transparent"
           color={colors.accent}>
@@ -127,6 +133,7 @@ return (
         initialNumToRender={10}
         maxToRenderPerBatch={10}
         windowSize={5}
+        showsVerticalScrollIndicator={false}
         removeClippedSubviews={true}
         contentContainerStyle={{paddingHorizontal: 5}}
       />

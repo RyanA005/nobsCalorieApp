@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import React from 'react';
 import { AntDesign } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -14,13 +14,12 @@ const FoodItem = ({ item }) => {
 
   const navigation = useNavigation();
 
+  // activeOpacity={0.5}
+  // underlayColor={'transparent'}
+
   return ( 
-    <View style={[styles.container, { backgroundColor: colors.boxes }]}>
-      <View>
-        <Text style={{ color: colors.text, fontWeight: 'bold' }}>{item.name} {isCustom == 1 ? <AntDesign name="star" size={12} color={colors.accent}/> : null}</Text>
-        <Text style={{ color: colors.text }}>{isCustom == "0" ? item.cat : "Custom"}, {item.cal} Calories</Text>
-      </View>
-      <AntDesign.Button 
+    <View>
+      <TouchableOpacity
         onPress={() => navigation.navigate("FoodPage", { 
           name: item.name, 
           iscustom: isCustom, 
@@ -31,10 +30,21 @@ const FoodItem = ({ item }) => {
           qty: item.qty || 100,
           baseQty: item.qty
         })}
+        activeOpacity={0.8}
+        underlayColor={'transparent'}
+      >
+    <View style={[styles.container, { backgroundColor: colors.boxes }]}>
+      <View>
+        <Text style={{ color: colors.text, fontWeight: 'bold' }}>{item.name} {isCustom == 1 ? <AntDesign name="star" size={12} color={colors.accent}/> : null}</Text>
+        <Text style={{ color: colors.text }}>{isCustom == "0" ? item.cat : "Custom"}, {item.cal} Calories</Text>
+      </View>
+      <AntDesign 
         title="Add"
         AntDesign name="pluscircleo" 
         size={24} color={colors.accent} backgroundColor={colors.boxes}
       />
+            </View>
+      </TouchableOpacity>
     </View>
   )
 }

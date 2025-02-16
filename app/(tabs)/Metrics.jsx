@@ -175,21 +175,6 @@ export default function Metrics() {
     }));
   }, [metrics.length]);
 
-  const renderItem = useCallback(({item}) => (
-    <MetricsGraphElement 
-      values={[
-        item.date, 
-        displayConfig.tracking === "protein" ? item.protein : item.calories,
-        displayConfig.tracking === "protein" ? item.proteingoal : item.caloriesgoal,
-        colors.green,
-        displayConfig.barWidth,
-        displayConfig.tracking === "protein" ? displayConfig.maxProtein : displayConfig.maxCalories,
-        displayConfig.maxItems,
-        displayConfig.spacing
-      ]}
-    />
-  ), [displayConfig, colors.green]);
-
   useEffect(() => {
     let mounted = true;
     

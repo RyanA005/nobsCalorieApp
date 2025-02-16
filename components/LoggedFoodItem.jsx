@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import React from 'react';
 import { AntDesign } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -58,6 +58,13 @@ const LoggedFoodItem = ({ item, index, iscustom, fromQuickAdd }) => {
   };
 
   return ( 
+<View>
+  <TouchableOpacity
+    activeOpacity={0.8}
+    underlayColor={'transparent'}
+    onPress={handlePress}
+    padding={5}>
+
     <View style={[styles.container, { backgroundColor: colors.boxes }]}>
       <View style={{ justifyContent: 'center', flex: 1 }}>
         <Text style={{ color: colors.text, fontWeight: 'bold' }}> 
@@ -66,8 +73,7 @@ const LoggedFoodItem = ({ item, index, iscustom, fromQuickAdd }) => {
         <Text style={{ color: colors.text }}>{formatNumber(calculatedValues.protein)}g Protein, {formatNumber(calculatedValues.carb)}g Carb, {formatNumber(calculatedValues.fat)}g Fat 
         </Text>
       </View>
-      <AntDesign.Button 
-        onPress={handlePress}
+      <AntDesign 
         title="edit"
         name="edit"
         size={24} 
@@ -75,6 +81,8 @@ const LoggedFoodItem = ({ item, index, iscustom, fromQuickAdd }) => {
         backgroundColor={colors.boxes}
       />
     </View>
+    </TouchableOpacity>
+</View>
   );
 }
 
