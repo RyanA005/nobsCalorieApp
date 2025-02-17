@@ -9,14 +9,14 @@ import HorizontalBarChart from "../../components/HorizontalBarChart";
 import DetailsModal from "../DetailsModal";
 import LoggedFoodItem from '@/components/LoggedFoodItem';
 
-import { useAppTheme } from '../../hooks/colorScheme';
+import { useAppTheme, subscribeToTheme  } from '../../hooks/colorScheme';
 
 import { FIREBASE_AUTH } from '../../FirebaseConfig';
 import { checkDayAndUpdate } from '../../functions/firebaseDB';
 
 export default function Home({ navigation }) {  // Add navigation prop
 
-  const colors = useAppTheme();
+  const [colors, setColors] = useState(useAppTheme());
   
   const [foodData, setFoodData] = useState([]);  
   const [goals, setGoals] = useState({
@@ -86,6 +86,13 @@ export default function Home({ navigation }) {  // Add navigation prop
     return unsubscribe;
   }, [database, navigation]);
 
+  // Add color scheme subscription
+  useEffect(() => {
+    const unsubscribe = subscribeToTheme(newColors => {
+      setColors(newColors);
+    });
+    return () => unsubscribe();
+  }, []);
 
   // Update totals whenever foodData or day changes
   useEffect(() => {

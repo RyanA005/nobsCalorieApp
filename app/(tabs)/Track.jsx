@@ -1,17 +1,17 @@
 import { View, StyleSheet, FlatList, TextInput, Text } from 'react-native'
-import React from 'react'
+import React, { useEffect } from 'react'
+import { useState } from 'react'
 import FoodItem from '@/components/FoodItem'
 
-import { useState } from 'react'
 import { AntDesign } from '@expo/vector-icons'
 
 import { useSQLiteContext } from 'expo-sqlite';
 
 import { SearchFood } from '../../functions/SearchFood'
-import { useAppTheme } from '../../hooks/colorScheme';
+import { useAppTheme, subscribeToTheme } from '../../hooks/colorScheme';
 
 export default function Track({ navigation }) {
-  const colors = useAppTheme();
+  const [colors, setColors] = useState(useAppTheme());
 
   const [searchResults, setSearchResults] = useState([]);
   const [noResults, setNoResults] = useState(false);
@@ -63,6 +63,13 @@ export default function Track({ navigation }) {
   });
 
   const database = useSQLiteContext();
+
+  useEffect(() => {
+    const unsubscribe = subscribeToTheme(newColors => {
+      setColors(newColors);
+    });
+    return () => unsubscribe();
+  }, []);
 
 return (
   <View style={[styles.container, {backgroundColor: colors.background}]}>

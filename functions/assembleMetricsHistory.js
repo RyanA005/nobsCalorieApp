@@ -1,4 +1,4 @@
-import { collection, getDocs, query, where, Timestamp } from 'firebase/firestore';
+import { collection, getDocs, query } from 'firebase/firestore';
 import { FIREBASE_DB } from '../FirebaseConfig';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -80,7 +80,8 @@ export const assembleMetricsHistory = async (userId) => {
                     await createEmptyMetrics(new Date(currentDate))
                 );
             }
-            console.log('Filled metrics:', filledMetrics);
+            console.log("retrived metrics");
+            //console.log('Filled metrics:', filledMetrics);
             return filledMetrics;
         }
 

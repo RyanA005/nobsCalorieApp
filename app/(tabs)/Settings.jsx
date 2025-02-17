@@ -1,23 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, Alert, Switch, StyleSheet } from 'react-native';
+import { View, Text, Button, Alert, Switch, StyleSheet, Appearance } from 'react-native';
 import { FIREBASE_AUTH } from '../../FirebaseConfig';
 import { signOut } from 'firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { checkDayAndUpdate } from '../../functions/firebaseDB';
 
-import { useAppTheme } from '../../hooks/colorScheme';
-import { storeMetrics } from '../../functions/firebaseDB';
-import { useSQLiteContext } from 'expo-sqlite';
+import { useAppTheme, updateApp, getCurrentScheme } from '../../hooks/colorScheme';
 
 export default function Settings() {
   const colors = useAppTheme();
   const [userEmail, setUserEmail] = useState('');
+  const [isEnabled, setIsEnabled] = useState(getCurrentScheme() === 'dark');
 
   useEffect(() => {
+    // Load user email
     const user = FIREBASE_AUTH.currentUser;
     if (user) {
       setUserEmail(user.email);
     }
+
+    // Initialize switch state from stored theme
+    AsyncStorage.getItem('@app_theme')
+      .then(savedTheme => {
+        if (savedTheme) {
+          setIsEnabled(savedTheme === 'dark');
+        }
+      })
+      .catch(error => console.error('Error loading theme state:', error));
   }, []);
 
   const handleLogout = async () => {
@@ -45,13 +53,14 @@ export default function Settings() {
     );
   };
 
-  const db = useSQLiteContext();
-  const date = new Date();
-  date.setDate(date.getDate() + 5);
-
   const doTest = async () => {
     console.log('test! ');
-    await checkDayAndUpdate(FIREBASE_AUTH.currentUser, db, date);
+  };
+
+  const flipColorScheme = () => {
+    const newScheme = !isEnabled ? 'dark' : 'light';
+    setIsEnabled(!isEnabled);
+    updateApp(newScheme);
   };
 
   return (
@@ -67,6 +76,10 @@ export default function Settings() {
         style={styles.button}
         title="test"
         onPress={doTest}
+      />
+      <Switch
+        value={isEnabled}
+        onValueChange={flipColorScheme}
       />
     </View>
   );

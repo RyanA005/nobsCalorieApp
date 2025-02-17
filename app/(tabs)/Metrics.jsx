@@ -9,12 +9,11 @@ import { FIREBASE_APP } from '../../FirebaseConfig';
 
 import MetricsGraphElement from '../../components/MetricsGraphElement';
 import { calculateAwards } from '../../functions/awardCalculations';
-import { useAppTheme } from '../../hooks/colorScheme';
+import { useAppTheme, subscribeToTheme } from '../../hooks/colorScheme';
 import { assembleMetricsHistory } from '../../functions/assembleMetricsHistory';
 
 export default function Metrics() {
-  
-  const colors = useAppTheme();
+  const [colors, setColors] = useState(useAppTheme());
 
   const smartTruncate = (text, limit) => {
     return text.length > limit ? text.slice(0, limit) + '...' : text;
@@ -220,6 +219,13 @@ export default function Metrics() {
     const calculatedAwards = calculateAwards(metrics);
     setAwards(calculatedAwards);
   }, [metrics]);
+
+  useEffect(() => {
+    const unsubscribe = subscribeToTheme(newColors => {
+      setColors(newColors);
+    });
+    return () => unsubscribe();
+  }, []);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>

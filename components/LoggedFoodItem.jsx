@@ -88,6 +88,8 @@ const LoggedFoodItem = ({ item, index, iscustom, fromQuickAdd }) => {
 
 const styles = StyleSheet.create({
   container: {
+    minHeight: 60,
+    alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '100%',

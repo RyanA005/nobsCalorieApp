@@ -53,6 +53,7 @@ const styles = StyleSheet.create({
   container: {
     justifyContent: 'space-between',
     alignItems: 'center',
+    minHeight: 55,
     width: '100%',
     borderRadius: 10,
     padding: 10,

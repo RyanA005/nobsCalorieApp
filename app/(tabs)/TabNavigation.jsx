@@ -1,8 +1,8 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AntDesign } from '@expo/vector-icons';
-import { useAppTheme } from '../../hooks/colorScheme';
-import { useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import { useAppTheme, subscribeToTheme } from '../../hooks/colorScheme';
 
 import Home from './Home';
 import Track from './Track';
@@ -20,8 +20,15 @@ const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 function TabScreens({ navigation }) {
-  const colors = useAppTheme();
+  const [colors, setColors] = useState(useAppTheme());
   const rootNavigation = useRef(navigation);
+
+  useEffect(() => {
+    const unsubscribe = subscribeToTheme(newColors => {
+      setColors(newColors);
+    });
+    return () => unsubscribe();
+  }, []);
 
   return (
     <Tab.Navigator
@@ -72,8 +79,15 @@ function TabScreens({ navigation }) {
 }
 
 export function TabNavigation() {
-  const colors = useAppTheme();
+  const [colors, setColors] = useState(useAppTheme());
   
+  useEffect(() => {
+    const unsubscribe = subscribeToTheme(newColors => {
+      setColors(newColors);
+    });
+    return () => unsubscribe();
+  }, []);
+
   return (
     <Stack.Navigator screenOptions={{ 
       headerTintColor: colors.accent,
