@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, DeviceEventEmitter } from 'react-native'
+import { View, Text, StyleSheet, ScrollView, DeviceEventEmitter, Modal, Button } from 'react-native'
 import React, { useEffect, useMemo, useCallback } from 'react'
 import { useState } from 'react';
 import { TouchableOpacity } from 'react-native';
@@ -227,6 +227,18 @@ export default function Metrics() {
     return () => unsubscribe();
   }, []);
 
+  const [streakDetailsVisible, setStreakDetailsVisible] = useState(false);
+  const toggleStreakDetails = () => setStreakDetailsVisible(!streakDetailsVisible);
+
+  const [perfectDetailsVisible, setPerfectDetailsVisible] = useState(false);
+  const togglePerfectDetails = () => setPerfectDetailsVisible(!perfectDetailsVisible);
+
+  const [totalDetailsVisible, setTotalDetailsVisible] = useState(false);
+  const toggleTotalDetails = () => setTotalDetailsVisible(!totalDetailsVisible);
+
+  const [accuracyDetailsVisible, setAccuracyDetailsVisible] = useState(false);
+  const toggleAccuracyDetails = () => setAccuracyDetailsVisible(!accuracyDetailsVisible);
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.contentWrapper}>
@@ -353,6 +365,10 @@ export default function Metrics() {
 
         <View style={[ styles.awardsCard, {  }]}>
           <View style={[styles.awardRowConatiner, {}]}>
+            <TouchableOpacity
+            onPress={toggleStreakDetails}
+            activeOpacity={0.7}
+            >
             <View style={[styles.award, styles.card, {backgroundColor: colors.boxes}]}>
               <View style={styles.awardContent}>
                 <MaterialCommunityIcons name="fire" size={40} color={colors.accent} />
@@ -360,6 +376,11 @@ export default function Metrics() {
                 <Text style={[styles.awardValue, {color: colors.text}]}>{awards.streak} days</Text>
               </View>
             </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+            onPress={togglePerfectDetails}
+            activeOpacity={0.7}
+            >
             <View style={[styles.award, styles.card, {backgroundColor: colors.boxes}]}>
               <View style={styles.awardContent}>
                 <MaterialCommunityIcons name="star-circle" size={35} color={colors.blueColor} />
@@ -367,8 +388,13 @@ export default function Metrics() {
                 <Text style={[styles.awardValue, {color: colors.text}]}>{awards.perfectDays}</Text>
               </View>
             </View>
+            </TouchableOpacity>
           </View> 
           <View style={[styles.awardRowConatiner, {}]}>
+          <TouchableOpacity
+            onPress={toggleTotalDetails}
+            activeOpacity={0.7}
+            >
             <View style={[styles.award, styles.card, {backgroundColor: colors.boxes}]}>
               <View style={styles.awardContent}>
                 <Ionicons name="calendar" size={35} color={colors.greenColor} />
@@ -376,6 +402,11 @@ export default function Metrics() {
                 <Text style={[styles.awardValue, {color: colors.text}]}>{awards.totalDays}</Text>
               </View>
             </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+            onPress={toggleAccuracyDetails}
+            activeOpacity={0.7}
+            >
             <View style={[styles.award, styles.card, {backgroundColor: colors.boxes}]}>
               <View style={styles.awardContent}>
                 <MaterialCommunityIcons name="target" size={40} color={colors.yellowColor} />
@@ -383,16 +414,112 @@ export default function Metrics() {
                 <Text style={[styles.awardValue, {color: colors.text}]}>{awards.averageAccuracy}%</Text>
               </View>
             </View>
+            </TouchableOpacity>
           </View> 
         </View>
       </View>
+
+
+
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={streakDetailsVisible}
+        onRequestClose={toggleStreakDetails}
+      >
+        <View style={[styles.modalView, styles.card, { backgroundColor: colors.boxes }]}>
+          <MaterialCommunityIcons name="fire" size={60} color={colors.accent} />
+          <Text style={[styles.awardValue, {color: colors.text}]}>{awards.streak} days</Text>
+          <Text style={[styles.modalText, {color: colors.text}]}>{'\n'}Get back to work</Text>
+
+          <Button
+            style={[styles.modalText]}
+            color={colors.accent} 
+            title="Close"
+            onPress={toggleStreakDetails}
+          />
+        </View>
+      </Modal>
+
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={perfectDetailsVisible}
+        onRequestClose={togglePerfectDetails}
+      >
+        <View style={[styles.modalView, styles.card, { backgroundColor: colors.boxes }]}>
+          <MaterialCommunityIcons name="star-circle" size={60} color={colors.blueColor} />
+          <Text style={[styles.awardValue, {color: colors.text}]}>{awards.perfectDays} days</Text>
+          <Text style={[styles.modalText, {color: colors.text}]}>{'\n'}You should try harder</Text>
+
+          <Button
+            style={[styles.modalText]}
+            color={colors.accent} 
+            title="Close"
+            onPress={togglePerfectDetails}
+          />
+        </View>
+      </Modal>
+
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={totalDetailsVisible}
+        onRequestClose={toggleTotalDetails}
+      >
+        <View style={[styles.modalView, styles.card, { backgroundColor: colors.boxes }]}>
+          <Ionicons name="calendar" size={60} color={colors.greenColor} />
+          <Text style={[styles.awardValue, {color: colors.text}]}>{awards.totalDays} days</Text>
+          <Text style={[styles.modalText, {color: colors.text}]}>{'\n'}Thats not very good</Text>
+
+          <Button
+            style={[styles.modalText]}
+            color={colors.accent} 
+            title="Close"
+            onPress={toggleTotalDetails}
+          />
+          </View>
+      </Modal>
+
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={accuracyDetailsVisible}
+        onRequestClose={toggleAccuracyDetails}
+      >
+        <View style={[styles.modalView, styles.card, { backgroundColor: colors.boxes }]}>
+          <MaterialCommunityIcons name="target" size={60} color={colors.yellowColor} />
+          <Text style={[styles.awardValue, {color: colors.text}]}>{awards.averageAccuracy}%</Text>
+          <Text style={[styles.modalText, {color: colors.text}]}>{'\n'}You can do better</Text>
+
+          <Button
+            style={[styles.modalText]}
+            color={colors.accent} 
+            title="Close"
+            onPress={toggleAccuracyDetails}
+          />
+          </View>
+      </Modal>
+
+
     </View>
-  )
-}
+  )}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  modalText: {
+    fontSize: 16,
+  },
+  modalView: {
+    gap: 5,
+    justifyContent: 'center',
+    marginHorizontal: 'auto',
+    marginVertical: 'auto',
+    alignItems: 'center',
+    width: '80%',
+    height: '35%',
   },
   contentWrapper: {
     flex: 1,

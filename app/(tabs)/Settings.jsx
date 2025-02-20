@@ -12,8 +12,8 @@ export default function Settings() {
   const [userEmail, setUserEmail] = useState('');
   const [isEnabled, setIsEnabled] = useState(getCurrentScheme() === 'dark');
   const [isPolicyVisible, setIsPolicyVisible] = useState(false);
-  const [vibrationEnabled, setVibrationEnabled] = useState(true);
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [vibrationEnabled, setVibrationEnabled] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [reminderTime, setReminderTime] = useState('21:00');
 
   useEffect(() => {
