@@ -7,7 +7,7 @@ const Scan = () => {
   
   return (
     <View style={[styles.container, {backgroundColor: colors.background}]}>
-      <Text style={{color: colors.text}}>Scan Screen</Text>
+      <Text style={{color: colors.text}}>Coming Soon...</Text>
     </View>
   )
 }

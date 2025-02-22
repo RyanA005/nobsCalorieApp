@@ -7,7 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { useAppTheme, updateApp, getCurrentScheme } from '../../hooks/colorScheme';
 
-export default function Settings() {
+export default function Settings({ navigation }) {
   const colors = useAppTheme();
   const [userEmail, setUserEmail] = useState('');
   const [isEnabled, setIsEnabled] = useState(getCurrentScheme() === 'dark');
@@ -99,6 +99,11 @@ export default function Settings() {
     const newScheme = !isEnabled ? 'dark' : 'light';
     setIsEnabled(!isEnabled);
     updateApp(newScheme);
+  };
+
+  const gotToPayments = () => {
+    console.log('go to payments');
+    navigation.navigate('Payments')
   };
 
   return (
@@ -266,6 +271,21 @@ export default function Settings() {
           />
         </View>
       </Modal>
+      
+      {/* Account Section */}
+      <View style={styles.section}>
+        <Text style={[styles.sectionHeader, {color: colors.text}]}>Payment</Text>
+        <View style={[styles.card, {backgroundColor: colors.boxes}]}>
+          
+          <TouchableOpacity onPress={gotToPayments} style={styles.settingRow}>
+            <View style={styles.settingInfo}>
+              <MaterialIcons name="close" size={24} color={colors.text} />
+              <Text style={[styles.settingText, {color: colors.text}]}>Update or Cancel</Text>
+            </View>
+            <AntDesign name="right" size={20} color={colors.text} />
+          </TouchableOpacity>
+          </View>
+      </View>
     </ScrollView>
   );
 }

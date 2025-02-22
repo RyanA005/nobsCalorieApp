@@ -1,14 +1,14 @@
 import { View, Text, StyleSheet, TextInput, ActivityIndicator, Button, KeyboardAvoidingView } from 'react-native'
 import React, { useState } from 'react'
+import { NavigationProp } from '@react-navigation/native'
 import { FIREBASE_AUTH } from '../FirebaseConfig'
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { addDoc, collection, doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc } from 'firebase/firestore';
 import { FIREBASE_DB } from '../FirebaseConfig';
 
 import { useAppTheme } from '../hooks/colorScheme';
-
-const Login = () => {
+const Login = ({ navigation }: { navigation: NavigationProp<any> }) => {
 
     const colors = useAppTheme();
     
@@ -16,6 +16,7 @@ const Login = () => {
     const [password, setPassword] = useState('')
     const [loading, setLoading] = useState(false)
     const auth = FIREBASE_AUTH
+
 
     const signIn = async () => {
         setLoading(true)
@@ -33,18 +34,9 @@ const Login = () => {
     }
 
     const signUp = async () => {
-        setLoading(true)
-        try {
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password)
-            alert("Sign up successful")
-            // Add user to collection after successful signup
-            await addUserToCollection(email, userCredential.user.uid)
-        } catch (error: any) {
-            alert("Sign up failed: " + error.message)
-            console.error(error)
-        } finally {
-            setLoading(false)
-        }
+
+        navigation.navigate('Onboarding')
+
     }
 
     React.useEffect(() => {

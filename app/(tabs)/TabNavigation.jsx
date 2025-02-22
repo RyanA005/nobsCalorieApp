@@ -16,6 +16,8 @@ import Scan from '../Scan';
 import Goals from '../Goals';
 import DetailsModal from '../DetailsModal';
 
+import Payments from '../Payments';
+
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
@@ -118,6 +120,11 @@ export function TabNavigation() {
         name="Goals" 
         component={Goals}
         options={{ headerShown: true, title: 'Goals' , headerBackTitle: 'Home' }}
+      />
+      <Stack.Screen 
+        name="Payments" 
+        component={Payments}
+        options={{ headerShown: false }}
       />
     </Stack.Navigator>
   );

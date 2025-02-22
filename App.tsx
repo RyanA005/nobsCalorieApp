@@ -9,6 +9,7 @@ import Login from './app/Login';
 import { TabNavigation } from './app/(tabs)/TabNavigation';
 import { FIREBASE_AUTH } from './FirebaseConfig';
 import Goals from './app/Goals';
+import Onboarding from './app/Onboarding';
 
 const Stack = createNativeStackNavigator();
 
@@ -66,6 +67,7 @@ export default function App() {
           headerTitleStyle: { color: colors.accent }
         }}>
           <Stack.Screen name="Login" component={Login} />
+          <Stack.Screen name="Onboarding" component={Onboarding} />
         </Stack.Navigator>
       </NavigationContainer>
     );
