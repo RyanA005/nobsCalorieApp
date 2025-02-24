@@ -11,6 +11,8 @@ import { FIREBASE_AUTH } from './FirebaseConfig';
 import Goals from './app/Goals';
 import Onboarding from './app/Onboarding';
 
+import getFoodData from './functions/SearchFood';
+
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -45,6 +47,7 @@ export default function App() {
                   fat INTEGER
               );
           `);
+      await getFoodData("acerola"); // sends a request to wake up API
       } catch (error) {
           console.error("Error creating database: ", error);
       }
