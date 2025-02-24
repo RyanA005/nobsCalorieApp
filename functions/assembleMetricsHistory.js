@@ -1,6 +1,17 @@
 import { collection, getDocs, query } from 'firebase/firestore';
 import { FIREBASE_DB } from '../FirebaseConfig';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { DeviceEventEmitter } from 'react-native';
+
+// Set up listener for food history changes
+DeviceEventEmitter.addListener('foodHistoryChanged', async () => {
+    try {
+        await AsyncStorage.removeItem('cachedMetrics');
+        console.log('Metrics cache cleared due to food history change');
+    } catch (error) {
+        console.warn('Failed to clear metrics cache:', error);
+    }
+});
 
 const createEmptyMetrics = async (date) => {
     const savedGoals = await AsyncStorage.getItem('userGoals');
@@ -19,10 +30,32 @@ const createEmptyMetrics = async (date) => {
 
 export const assembleMetricsHistory = async (userId) => {
     try {
+        // Try to get cached data first
+        try {
+            const cachedData = await AsyncStorage.getItem('cachedMetrics');
+            if (cachedData) {
+                const parsedCache = JSON.parse(cachedData);
+                if (Array.isArray(parsedCache) && parsedCache.length > 0) {
+                    const hydratedCache = parsedCache.map(metric => ({
+                        ...metric,
+                        date: new Date(metric.date)
+                    }));
+                    console.log("Retrieved cached metrics");
+                    return hydratedCache;
+                }
+            }
+        } catch (cacheError) {
+            console.warn("Cache retrieval failed:", cacheError);
+            // Clear corrupted cache
+            await AsyncStorage.removeItem('cachedMetrics');
+        }
+
         if (!userId) {
             console.error('Missing userId parameter');
             return [];
         }
+
+        console.log("Fetching metrics from firebase");
 
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -80,8 +113,19 @@ export const assembleMetricsHistory = async (userId) => {
                     await createEmptyMetrics(new Date(currentDate))
                 );
             }
-            console.log("retrived metrics");
-            //console.log('Filled metrics:', filledMetrics);
+            console.log("Retrieved metrics from firebase");
+            //console.log(filledMetrics);
+
+            try {
+                // Ensure the data is serializable before caching
+                const metricsToCache = filledMetrics.map(metric => ({
+                    ...metric,
+                    date: metric.date.toISOString() // Convert Date to ISO string for reliable serialization
+                }));
+                await AsyncStorage.setItem('cachedMetrics', JSON.stringify(metricsToCache));
+            } catch (cacheError) {
+                console.warn("Failed to cache metrics:", cacheError);
+            }
             return filledMetrics;
         }
 
