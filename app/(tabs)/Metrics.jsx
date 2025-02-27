@@ -54,8 +54,8 @@ export default function Metrics() {
 
   const timeSelectorData = useMemo(() => [
     {value: 1, label: 'Week'},
-    ...(metrics.length >= 12 ? [{value: 2, label: 'Month'}] : []),
-    ...(metrics.length >= 40 ? [{value: 3, label: 'Year'}] : []),
+    ...(metrics.length >= 15 ? [{value: 2, label: 'Month'}] : []),
+    ...(metrics.length >= 60 ? [{value: 3, label: 'Year'}] : []),
     ...(metrics.length >= 365 ? [{value: 4, label: 'All Time'}] : [])
   ], [metrics.length]);
 

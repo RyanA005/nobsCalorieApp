@@ -13,6 +13,11 @@ import Onboarding from './app/Onboarding';
 
 import getFoodData from './functions/SearchFood';
 
+import Purchases from 'react-native-purchases';
+
+import { clearMetricsCache } from './functions/assembleMetricsHistory';
+import { assembleMetricsHistory } from './functions/assembleMetricsHistory';
+
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -59,6 +64,20 @@ export default function App() {
     onAuthStateChanged(FIREBASE_AUTH, (user) => {
       setUser(user);
     });
+
+    clearMetricsCache(); // clear cache on app start
+    if (FIREBASE_AUTH.currentUser) {
+      assembleMetricsHistory(FIREBASE_AUTH.currentUser.uid); // regenerate cache on app start
+    }
+
+    const paymentSetup = async () => {
+      await Purchases.configure({
+        apiKey: "appl_myPlGGxcSNqImEdpqAXMYahsGoa",
+      });
+      const prods = await Purchases.getProducts(["testsub"]);
+      console.log("products:", prods);
+    }
+    paymentSetup();
   }, []);
 
   if (!user) {

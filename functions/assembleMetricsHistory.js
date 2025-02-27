@@ -30,7 +30,6 @@ const createEmptyMetrics = async (date) => {
 
 export const assembleMetricsHistory = async (userId) => {
     try {
-        // Try to get cached data first
         try {
             const cachedData = await AsyncStorage.getItem('cachedMetrics');
             if (cachedData) {
@@ -142,3 +141,12 @@ export const assembleMetricsHistory = async (userId) => {
         return [];
     }
 };
+
+export const clearMetricsCache = async () => {
+    try {
+        await AsyncStorage.removeItem('cachedMetrics');
+        console.log('Metrics cache cleared');
+    } catch (error) {
+        console.warn('Failed to clear metrics cache:', error);
+    }
+}
