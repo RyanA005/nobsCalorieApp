@@ -5,16 +5,18 @@ import { AntDesign } from '@expo/vector-icons';
 import { useAppTheme } from '../hooks/colorScheme';
 import FeaturesSlideshow from '../components/FeaturesSlideshow'
 
+import Purchases from 'react-native-purchases';
+
 import React from 'react'
 
 const Onboarding = () => {
 
   const [colors, setColors] = useState(useAppTheme());
   
+  // <FeaturesSlideshow />
+
   return (
     <View style={[styles.container, {backgroundColor: colors.backgroundColor}]}>
-
-      <FeaturesSlideshow/>
 
       <View style={[styles.intro, {}]}>
       <Text style={[styles.subtitle, {color:colors.text}]}>You're too intelligent for all the BS</Text>
