@@ -3,9 +3,6 @@ import React from 'react'
 
 const images = [
     { id: 0, URL: null, tip: null},
-    { id: 1, URL: require('../assets/Images/light/home.jpg'), tip: 'Welcome to NoBs'},
-    { id: 2, URL: require('../assets/Images/light/goals.jpg'), tip: 'Adjust your goals to fit your needs'},
-    { id: 3, URL: require('../assets/Images/light/details.jpg'), tip: 'Get in-depth details on your intake'},
 ]
 
 const SlideItem = ({ item }) => (
