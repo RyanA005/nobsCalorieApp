@@ -70,14 +70,16 @@ export default function App() {
       assembleMetricsHistory(FIREBASE_AUTH.currentUser.uid); // regenerate cache on app start
     }
 
-    const paymentSetup = async () => {
-      await Purchases.configure({
-        apiKey: "appl_myPlGGxcSNqImEdpqAXMYahsGoa",
-      });
-      const prods = await Purchases.getProducts(["testsub"]);
-      console.log("products:", prods);
-    }
-    paymentSetup();
+    // const paymentSetup = async () => { // fix this later lets get this app launched first
+    //   await Purchases.configure({
+    //     apiKey: "appl_myPlGGxcSNqImEdpqAXMYahsGOa",
+    //   });
+    //   //getProducts(productIdentifiers: string[], type?: PURCHASE_TYPE):
+    //   const prods = await Purchases.getProducts(["testsub"]);
+    //   console.log("products:", prods);
+    // }
+    // paymentSetup();
+    
   }, []);
 
   if (!user) {
@@ -88,8 +90,8 @@ export default function App() {
           headerTintColor: colors.accent,
           headerTitleStyle: { color: colors.accent }
         }}>
-          <Stack.Screen name="Login" component={Login} />
-          <Stack.Screen name="Onboarding" component={Onboarding} />
+          <Stack.Screen name="Login" component={Login} options={{ gestureEnabled: false }}/>
+          <Stack.Screen name="Onboarding" component={Onboarding} options={{ gestureEnabled: false }}/>
         </Stack.Navigator>
       </NavigationContainer>
     );

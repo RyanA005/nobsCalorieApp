@@ -1,5 +1,5 @@
-import { View, Text, StyleSheet, ScrollView, DeviceEventEmitter, Modal, Button } from 'react-native'
-import React, { useEffect, useMemo, useCallback } from 'react'
+import { View, Text, StyleSheet, ScrollView, DeviceEventEmitter, Modal, Button, Animated } from 'react-native'
+import React, { useEffect, useMemo, useCallback, useRef } from 'react'
 import { useState } from 'react';
 import { TouchableOpacity } from 'react-native';
 import { AntDesign, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
@@ -14,6 +14,13 @@ import { assembleMetricsHistory } from '../../functions/assembleMetricsHistory';
 
 export default function Metrics() {
   const [colors, setColors] = useState(useAppTheme());
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const awardFadeAnims = useRef({
+    streak: new Animated.Value(0),
+    perfectDays: new Animated.Value(0),
+    totalDays: new Animated.Value(0),
+    averageAccuracy: new Animated.Value(0)
+  }).current;
 
   const smartTruncate = (text, limit) => {
     return text.length > limit ? text.slice(0, limit) + '...' : text;
@@ -85,6 +92,12 @@ export default function Metrics() {
         return;
       }
 
+      fadeAnim.setValue(0); // Reset graph opacity
+      // Reset all award animations
+      Object.keys(awardFadeAnims).forEach(key => {
+        awardFadeAnims[key].setValue(0);
+      });
+
       const metricsData = await assembleMetricsHistory(auth.currentUser.uid);
       if (!Array.isArray(metricsData) || metricsData.length === 0) {
         console.warn('No metrics data returned');
@@ -93,6 +106,10 @@ export default function Metrics() {
       }
 
       setMetrics(metricsData);
+      
+      // Calculate awards immediately after setting metrics
+      const calculatedAwards = calculateAwards(metricsData);
+      setAwards(calculatedAwards);
       
       const reversedData = [...metricsData].reverse();
       const currentMaxItems = Math.min(displayConfig.maxItems, metricsData.length);
@@ -108,12 +125,29 @@ export default function Metrics() {
           ...prev,
           maxValues
         }));
+
+        // Start all animations together after data is processed
+        Animated.parallel([
+          Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 500,
+            useNativeDriver: true
+          }),
+          ...Object.keys(awardFadeAnims).map(key => 
+            Animated.timing(awardFadeAnims[key], {
+              toValue: 1,
+              duration: 500,
+              useNativeDriver: true
+            })
+          )
+        ]).start();
       }
     } catch (error) {
       console.error("Error fetching metrics:", error);
       setMetrics([]);
     }
-  }, [displayConfig.maxItems, findMax, auth.currentUser]);
+  }, [displayConfig.maxItems, findMax, auth.currentUser, fadeAnim, awardFadeAnims]);
+
   const getDisplayData = useMemo(() => {
     const maxForDisplay = 120;
     if (!metrics.length) return [];
@@ -216,11 +250,6 @@ export default function Metrics() {
   }, []);
 
   useEffect(() => {
-    const calculatedAwards = calculateAwards(metrics);
-    setAwards(calculatedAwards);
-  }, [metrics]);
-
-  useEffect(() => {
     const unsubscribe = subscribeToTheme(newColors => {
       setColors(newColors);
     });
@@ -321,7 +350,7 @@ export default function Metrics() {
             <View style={[{backgroundColor: colors.text, width: 10, height: 2, alignSelf: 'center'}]}></View>
           </View>
 
-            <View style={styles.graphWrapper}>
+            <Animated.View style={[styles.graphWrapper, { opacity: fadeAnim }]}>
               <ScrollView
                 horizontal
                 scrollEnabled={false}
@@ -341,7 +370,7 @@ export default function Metrics() {
                   />
                 ))}
               </ScrollView>
-            </View>
+            </Animated.View>
           </View>
           <View style={[{backgroundColor: colors.text, width: '100%', height: 2, justifyContent: 'center'}]}>
           <View style={[{backgroundColor: colors.text, width: 2, height: 10, alignSelf: 'flex-end'}]}></View>
@@ -373,7 +402,9 @@ export default function Metrics() {
               <View style={styles.awardContent}>
                 <MaterialCommunityIcons name="fire" size={40} color={colors.accent} />
                 <Text style={[styles.awardTitle, {color: colors.text}]}>Daily Streak</Text>
-                <Text style={[styles.awardValue, {color: colors.text}]}>{awards.streak} days</Text>
+                <Animated.Text style={[styles.awardValue, {color: colors.text, opacity: awardFadeAnims.streak}]}>
+                  {awards.streak} days
+                </Animated.Text>
               </View>
             </View>
             </TouchableOpacity>
@@ -385,7 +416,9 @@ export default function Metrics() {
               <View style={styles.awardContent}>
                 <MaterialCommunityIcons name="star-circle" size={35} color={colors.blueColor} />
                 <Text style={[styles.awardTitle, {color: colors.text}]}>Perfect Days</Text>
-                <Text style={[styles.awardValue, {color: colors.text}]}>{awards.perfectDays}</Text>
+                <Animated.Text style={[styles.awardValue, {color: colors.text, opacity: awardFadeAnims.perfectDays}]}>
+                  {awards.perfectDays}
+                </Animated.Text>
               </View>
             </View>
             </TouchableOpacity>
@@ -399,7 +432,9 @@ export default function Metrics() {
               <View style={styles.awardContent}>
                 <Ionicons name="calendar" size={35} color={colors.greenColor} />
                 <Text style={[styles.awardTitle, {color: colors.text}]}>Total Days</Text>
-                <Text style={[styles.awardValue, {color: colors.text}]}>{awards.totalDays}</Text>
+                <Animated.Text style={[styles.awardValue, {color: colors.text, opacity: awardFadeAnims.totalDays}]}>
+                  {awards.totalDays}
+                </Animated.Text>
               </View>
             </View>
             </TouchableOpacity>
@@ -411,7 +446,9 @@ export default function Metrics() {
               <View style={styles.awardContent}>
                 <MaterialCommunityIcons name="target" size={40} color={colors.yellowColor} />
                 <Text style={[styles.awardTitle, {color: colors.text}]}>Goal Accuracy</Text>
-                <Text style={[styles.awardValue, {color: colors.text}]}>{awards.averageAccuracy}%</Text>
+                <Animated.Text style={[styles.awardValue, {color: colors.text, opacity: awardFadeAnims.averageAccuracy}]}>
+                  {awards.averageAccuracy}%
+                </Animated.Text>
               </View>
             </View>
             </TouchableOpacity>
@@ -429,7 +466,9 @@ export default function Metrics() {
       >
         <View style={[styles.modalView, styles.card, { backgroundColor: colors.boxes }]}>
           <MaterialCommunityIcons name="fire" size={60} color={colors.accent} />
-          <Text style={[styles.awardValue, {color: colors.text}]}>{awards.streak} days</Text>
+          <Animated.Text style={[styles.awardValue, {color: colors.text, opacity: awardFadeAnims.streak}]}>
+            {awards.streak} days
+          </Animated.Text>
           <Text style={[styles.modalText, {color: colors.text}]}>{'\n'}Get back to work</Text>
 
           <Button
@@ -449,7 +488,9 @@ export default function Metrics() {
       >
         <View style={[styles.modalView, styles.card, { backgroundColor: colors.boxes }]}>
           <MaterialCommunityIcons name="star-circle" size={60} color={colors.blueColor} />
-          <Text style={[styles.awardValue, {color: colors.text}]}>{awards.perfectDays} days</Text>
+          <Animated.Text style={[styles.awardValue, {color: colors.text, opacity: awardFadeAnims.perfectDays}]}>
+            {awards.perfectDays} days
+          </Animated.Text>
           <Text style={[styles.modalText, {color: colors.text}]}>{'\n'}You should try harder</Text>
 
           <Button
@@ -469,7 +510,9 @@ export default function Metrics() {
       >
         <View style={[styles.modalView, styles.card, { backgroundColor: colors.boxes }]}>
           <Ionicons name="calendar" size={60} color={colors.greenColor} />
-          <Text style={[styles.awardValue, {color: colors.text}]}>{awards.totalDays} days</Text>
+          <Animated.Text style={[styles.awardValue, {color: colors.text, opacity: awardFadeAnims.totalDays}]}>
+            {awards.totalDays} days
+          </Animated.Text>
           <Text style={[styles.modalText, {color: colors.text}]}>{'\n'}Thats not very good</Text>
 
           <Button
@@ -489,7 +532,9 @@ export default function Metrics() {
       >
         <View style={[styles.modalView, styles.card, { backgroundColor: colors.boxes }]}>
           <MaterialCommunityIcons name="target" size={60} color={colors.yellowColor} />
-          <Text style={[styles.awardValue, {color: colors.text}]}>{awards.averageAccuracy}%</Text>
+          <Animated.Text style={[styles.awardValue, {color: colors.text, opacity: awardFadeAnims.averageAccuracy}]}>
+            {awards.averageAccuracy}%
+          </Animated.Text>
           <Text style={[styles.modalText, {color: colors.text}]}>{'\n'}You can do better</Text>
 
           <Button

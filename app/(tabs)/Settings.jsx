@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Alert, Switch, StyleSheet, Modal, Button, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, Alert, Switch, StyleSheet, Modal, Button, ScrollView, TouchableOpacity, TextInput, Linking } from 'react-native';
 import { AntDesign, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { FIREBASE_AUTH } from '../../FirebaseConfig';
 import { signOut } from 'firebase/auth';
@@ -15,6 +15,8 @@ export default function Settings({ navigation }) {
   const [vibrationEnabled, setVibrationEnabled] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [reminderTime, setReminderTime] = useState('21:00');
+  const [isFeedbackVisible, setIsFeedbackVisible] = useState(false);
+  const [feedbackText, setFeedbackText] = useState('');
 
   useEffect(() => {
     // Load user email
@@ -103,7 +105,36 @@ export default function Settings({ navigation }) {
 
   const gotToPayments = () => {
     console.log('go to payments');
-    navigation.navigate('Payments')
+    //navigation.navigate('Payments') // fix when we include payments
+  };
+
+  const handleSendFeedback = async () => {
+    if (!feedbackText.trim()) {
+      Alert.alert('Error', 'Please enter your feedback before sending.');
+      return;
+    }
+
+    const emailSubject = 'Nobs App Feedback';
+    const emailBody = feedbackText;
+    const mailtoUrl = `mailto:ryanstestemail123@gmail.com?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+
+    const canOpen = await Linking.canOpenURL(mailtoUrl);
+    if (canOpen) {
+      await Linking.openURL(mailtoUrl);
+      setFeedbackText('');
+      setIsFeedbackVisible(false);
+    } else {
+      Alert.alert('Error', 'Could not open email client');
+    }
+  };
+
+  const openFeedbackModal = () => {
+    setIsFeedbackVisible(true);
+  };
+
+  const closeFeedbackModal = () => {
+    setIsFeedbackVisible(false);
+    setFeedbackText('');
   };
 
   return (
@@ -201,7 +232,7 @@ export default function Settings({ navigation }) {
             <AntDesign name="right" size={20} color={colors.text} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.settingRow}>
+          <TouchableOpacity onPress={openFeedbackModal} style={styles.settingRow}>
             <View style={styles.settingInfo}>
               <MaterialIcons name="help-outline" size={24} color={colors.text} />
               <Text style={[styles.settingText, {color: colors.text}]}>Help Center</Text>
@@ -209,7 +240,7 @@ export default function Settings({ navigation }) {
             <AntDesign name="right" size={20} color={colors.text} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.settingRow}>
+          <TouchableOpacity onPress={openFeedbackModal} style={styles.settingRow}>
             <View style={styles.settingInfo}>
               <MaterialIcons name="feedback" size={24} color={colors.text} />
               <Text style={[styles.settingText, {color: colors.text}]}>Send Feedback</Text>
@@ -226,8 +257,8 @@ export default function Settings({ navigation }) {
         onRequestClose={closePrivacyPolicy}
       >
         <View style={[styles.modalView, { backgroundColor: colors.background }]}>
-          <ScrollView style={styles.scrollView}>
-            <Text style={[styles.title, { color: colors.text }]}>Privacy Policy</Text>
+          <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+            <Text style={[styles.title, { color: colors.text, textAlign: 'center', marginTop: 50  }]}>Privacy Policy</Text>
             
             <Text style={[styles.sectionTitle, { color: colors.text }]}>1. Data Collection</Text>
             <Text style={[styles.content, { color: colors.text }]}>We collect the following data:
@@ -268,11 +299,46 @@ export default function Settings({ navigation }) {
           <Button
             title="Close"
             onPress={closePrivacyPolicy}
+            color={colors.accent} 
           />
         </View>
       </Modal>
       
-      {/* Account Section */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isFeedbackVisible}
+        onRequestClose={closeFeedbackModal}
+      >
+        <View style={[styles.modalView, { backgroundColor: colors.background }]}>
+          <Text style={[styles.title, { color: colors.text, textAlign: 'center', marginTop: 50 }]}>Send Feedback</Text>
+          <TextInput
+            style={[styles.feedbackInput, { 
+              color: colors.text,
+              backgroundColor: colors.boxes,
+              borderColor: colors.text
+
+            }]}
+            multiline
+            numberOfLines={6}
+            placeholder="Type your feedback or questions here..."
+            placeholderTextColor={colors.text + '80'}
+            value={feedbackText}
+            textAlign='center'
+            onChangeText={setFeedbackText}
+          />
+          <View style={styles.modalButtons}>
+            <Button title="Cancel" 
+            color={colors.accent} 
+            onPress={closeFeedbackModal}/>
+            <Button title="Send"
+            color={colors.accent} 
+            onPress={handleSendFeedback} />
+          </View>
+        </View>
+      </Modal>
+
+      {/*
       <View style={styles.section}>
         <Text style={[styles.sectionHeader, {color: colors.text}]}>Payment</Text>
         <View style={[styles.card, {backgroundColor: colors.boxes}]}>
@@ -285,7 +351,10 @@ export default function Settings({ navigation }) {
             <AntDesign name="right" size={20} color={colors.text} />
           </TouchableOpacity>
           </View>
-      </View>
+      </View> */}
+
+
+
     </ScrollView>
   );
 }
@@ -353,8 +422,6 @@ const styles = StyleSheet.create({
   },
   modalView: {
     flex: 1,
-    margin: 20,
-    borderRadius: 20,
     padding: 35,
     shadowColor: 'rgba(0,0,0,0.3)',
     shadowOffset: {
@@ -378,5 +445,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 15,
     lineHeight: 22,
+  },
+  feedbackInput: {
+    borderWidth: 1,
+    height: 200,
+    borderRadius: 20,
+    padding: 10,
+    marginVertical: 20,
+    textAlignVertical: 'top',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
   },
 });

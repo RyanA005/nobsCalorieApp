@@ -150,7 +150,7 @@ return (
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 8,
+    padding: 15,
     gap: 16,
   },
   card: {
